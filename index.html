@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#0A1628">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Gestión Master</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600;700&display=swap');
+  :root {
+    --bg:#0A1628;--surface:#111F35;--card:#162540;--border:#1E3A5F;
+    --accent:#00B4D8;--accent2:#F59E0B;--danger:#EF4444;--ok:#22C55E;
+    --text:#E2E8F0;--muted:#64748B;
+    --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100dvh;overflow-x:hidden}
+  header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
+  .brand{font-weight:700;font-size:15px;color:var(--accent);letter-spacing:.5px}
+  .brand span{color:var(--text);font-weight:300}
+  .sync-info{margin-left:auto;font-size:11px;color:var(--muted);font-family:var(--mono);text-align:right;line-height:1.5}
+  main{padding:16px;max-width:600px;margin:0 auto}
+  .step{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:14px;animation:fadeUp .3s ease both}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .step-title{font-size:11px;font-weight:600;letter-spacing:1.5px;color:var(--accent);text-transform:uppercase;margin-bottom:14px}
+  .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:8px;border:none;cursor:pointer;font-family:var(--sans);font-size:14px;font-weight:600;transition:all .15s;user-select:none}
+  .btn:active{transform:scale(.97)}
+  .btn+.btn{margin-top:8px}
+  .btn-primary{background:var(--accent);color:#000}
+  .btn-secondary{background:var(--surface);color:var(--text);border:1px solid var(--border)}
+  .btn-google{background:#fff;color:#333;border:1px solid #ddd;font-size:15px}
+  .search-wrap{position:relative}
+  .search-wrap input{width:100%;padding:13px 16px 13px 44px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:16px;font-family:var(--sans);outline:none;transition:border-color .2s}
+  .search-wrap input:focus{border-color:var(--accent)}
+  .search-wrap input::placeholder{color:var(--muted)}
+  .search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:18px;pointer-events:none}
+  .client-list{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+  .client-item{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 14px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:12px}
+  .client-item:active{background:var(--card);border-color:var(--accent)}
+  .client-avatar{width:38px;height:38px;border-radius:50%;background:var(--accent);color:#000;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+  .client-name{font-weight:600;font-size:14px}
+  .client-dni{font-size:12px;color:var(--muted);font-family:var(--mono)}
+  .back-btn{display:flex;align-items:center;gap:6px;color:var(--accent);font-size:14px;font-weight:600;cursor:pointer;margin-bottom:16px;width:fit-content}
+  .client-header{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:14px;display:flex;align-items:center;gap:16px}
+  .client-avatar-lg{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#0077A8);color:#000;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:22px;flex-shrink:0}
+  .client-info-name{font-size:18px;font-weight:700}
+  .client-info-sub{font-size:12px;color:var(--muted);margin-top:3px;font-family:var(--mono)}
+  .client-tel{font-size:13px;color:var(--accent);margin-top:4px}
+  .credito-card{background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden}
+  .credito-header{padding:14px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:1px solid transparent;transition:border-color .2s}
+  .credito-header.open{border-bottom-color:var(--border)}
+  .credito-id{font-family:var(--mono);font-size:11px;color:var(--muted);background:var(--surface);padding:2px 8px;border-radius:4px}
+  .credito-monto{font-weight:700;font-size:16px}
+  .credito-meta{font-size:11px;color:var(--muted);margin-top:2px}
+  .credito-badge{margin-left:auto;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;flex-shrink:0}
+  .badge-activo{background:#0A2E1A;color:var(--ok)}
+  .badge-vencido{background:#2E0A0A;color:var(--danger)}
+  .badge-cancelado{background:#1a1a2e;color:var(--muted)}
+  .credito-chevron{font-size:14px;color:var(--muted);transition:transform .2s;flex-shrink:0}
+  .credito-chevron.open{transform:rotate(180deg)}
+  .cuotas-wrap{padding:12px 16px}
+  .resumen-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+  .res-item{background:var(--surface);border-radius:8px;padding:10px 12px}
+  .res-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+  .res-value{font-size:16px;font-weight:700;margin-top:3px;font-family:var(--mono)}
+  .res-value.danger{color:var(--danger)}.res-value.ok{color:var(--ok)}.res-value.accent{color:var(--accent2)}
+  .cuota-row{display:flex;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);gap:10px}
+  .cuota-row:last-child{border-bottom:none}
+  .cuota-num{font-family:var(--mono);font-size:12px;color:var(--muted);width:28px;flex-shrink:0;text-align:center}
+  .cuota-info{flex:1;min-width:0}
+  .cuota-venc{font-size:12px;color:var(--muted)}
+  .cuota-monto{font-size:14px;font-weight:600}
+  .cuota-estado{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;flex-shrink:0}
+  .estado-PAGADA{background:#0A2E1A;color:var(--ok)}
+  .estado-PENDIENTE{background:#0A1F3A;color:var(--accent)}
+  .estado-VENCIDA{background:#2E0A0A;color:var(--danger)}
+  .estado-PARCIAL{background:#2E1E0A;color:var(--accent2)}
+  .empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:14px}
+  .empty-icon{font-size:40px;margin-bottom:10px}
+  .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:30px auto}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 20px;font-size:13px;transition:transform .3s;z-index:999;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+  .progress-bar{height:3px;background:var(--border);border-radius:2px;margin-top:12px;overflow:hidden}
+  .progress-fill{height:100%;background:var(--accent);width:0%;transition:width .4s;border-radius:2px}
+  #filePicker{display:none}
+</style>
+</head>
+<body>
+<header>
+  <div style="font-size:22px">💼</div>
+  <div>
+    <div class="brand">GESTIÓN <span>MASTER</span></div>
+  </div>
+  <div class="sync-info" id="syncInfo">Sin conexión</div>
+</header>
+<main id="main">
+  <div class="step">
+    <div class="step-title">🔐 Acceso</div>
+    <button class="btn btn-google" onclick="iniciarGoogle()">
+      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.2l6.7-6.7C35.7 2.5 30.2 0 24 0 14.6 0 6.6 5.5 2.7 13.5l7.8 6C12.4 13.1 17.8 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4 6.9-10 6.9-17z"/><path fill="#FBBC05" d="M10.5 28.5c-.5-1.5-.8-3-.8-4.5s.3-3 .8-4.5l-7.8-6C1 16.5 0 20.1 0 24s1 7.5 2.7 10.5l7.8-6z"/><path fill="#34A853" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.5-5.8c-2 1.4-4.6 2.2-7.7 2.2-6.2 0-11.5-4.2-13.4-9.9l-7.8 6C6.6 42.5 14.6 48 24 48z"/></svg>
+      Conectar con Google Drive
+    </button>
+    <button class="btn btn-secondary" onclick="document.getElementById('filePicker').click()">
+      📁 O cargar archivo .db manualmente
+    </button>
+    <input type="file" id="filePicker" accept=".db,.sqlite,.sqlite3" onchange="cargarDBArchivo(event)">
+    <div id="progressWrap" style="display:none">
+      <div style="font-size:12px;color:var(--muted);margin-top:12px;text-align:center" id="progressMsg"></div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+  </div>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const CLIENT_ID   = '121946157210-u52iu7th5ihvkl2bej3iaunrdvdh245g.apps.googleusercontent.com';
+const SCOPES      = 'https://www.googleapis.com/auth/drive.readonly';
+const DB_NAME     = 'financiera_principal.db';
+const FOLDER_ID   = '1dofNTHIM3IHDivPQXegJWlAlYkKhwIHg';
+
+let DB = null, SQL = null, accessToken = null, driveFileId = null;
+
+initSqlJs({ locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/${f}` })
+  .then(sql => { SQL = sql; });
+
+function toast(msg, dur=2800) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+
+function setProgress(msg, pct) {
+  document.getElementById('progressWrap').style.display = 'block';
+  document.getElementById('progressMsg').textContent = msg;
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+function iniciarGoogle() {
+  const client = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID, scope: SCOPES,
+    callback: async (resp) => {
+      if (resp.error) { toast('❌ Error de autenticación'); return; }
+      accessToken = resp.access_token;
+      setProgress('Buscando base de datos en Drive...', 20);
+      await buscarDBenDrive();
+    }
+  });
+  client.requestAccessToken();
+}
+
+async function buscarDBenDrive() {
+  try {
+    const q = encodeURIComponent(`name='${DB_NAME}' and '${FOLDER_ID}' in parents and trashed=false`);
+    const res = await fetch(
+      `https://www.googleapis.com/drive/v3/files?q=${q}&orderBy=modifiedTime desc&fields=files(id,name,modifiedTime)`,
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
+    const data = await res.json();
+    if (!data.files || !data.files.length) {
+      toast('❌ No encontré ' + DB_NAME + ' en la carpeta de backups'); setProgress('No encontrado', 0); return;
+    }
+    driveFileId = data.files[0].id;
+    const mod = new Date(data.files[0].modifiedTime);
+    document.getElementById('syncInfo').innerHTML =
+      `✓ Drive<br>${mod.toLocaleDateString('es-AR')} ${mod.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})}`;
+    await descargarDB(driveFileId);
+  } catch(e) { toast('❌ Error al buscar en Drive'); }
+}
+
+async function descargarDB(fileId) {
+  try {
+    setProgress('Descargando base de datos...', 55);
+    const res = await fetch(
+      `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
+    setProgress('Procesando...', 85);
+    DB = new SQL.Database(new Uint8Array(await res.arrayBuffer()));
+    setProgress('¡Listo!', 100);
+    setTimeout(() => mostrarBuscador(), 400);
+    toast('✅ Base cargada desde Drive');
+  } catch(e) { toast('❌ Error al descargar'); }
+}
+
+async function refrescarDrive() {
+  if (!accessToken || !driveFileId) { toast('Primero conectá con Google'); return; }
+  toast('🔄 Actualizando...'); await descargarDB(driveFileId);
+}
+
+function cargarDBArchivo(event) {
+  const file = event.target.files[0]; if (!file) return;
+  setProgress('Leyendo archivo...', 40);
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      DB = new SQL.Database(new Uint8Array(e.target.result));
+      const mod = new Date(file.lastModified);
+      document.getElementById('syncInfo').innerHTML =
+        `✓ ${file.name}<br>${mod.toLocaleDateString('es-AR')} ${mod.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})}`;
+      setProgress('¡Listo!', 100);
+      setTimeout(() => mostrarBuscador(), 400);
+      toast('✅ Base cargada');
+    } catch(e) { toast('❌ Archivo inválido'); }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ── BUSCADOR ─────────────────────────────────────────────
+function mostrarBuscador() {
+  document.getElementById('main').innerHTML = `
+    <div class="step">
+      <div class="step-title">🔍 Buscar cliente</div>
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Nombre, apellido o DNI..."
+               oninput="buscarClientes(this.value)" autocomplete="off" autocorrect="off">
+      </div>
+      <div class="client-list" id="clientList">
+        <div class="empty"><div class="empty-icon">👤</div>Escribí para buscar</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-title">⚡ Acciones rápidas</div>
+      <button class="btn btn-secondary" onclick="mostrarVencidos()">⚠️ Cuotas vencidas</button>
+      <button class="btn btn-secondary" onclick="refrescarDrive()">🔄 Actualizar desde Drive</button>
+      <button class="btn btn-secondary" onclick="location.reload()">🚪 Cerrar sesión</button>
+    </div>`;
+  document.getElementById('searchInput').focus();
+}
+
+function buscarClientes(q) {
+  const list = document.getElementById('clientList');
+  if (!q || q.length < 2) {
+    list.innerHTML = '<div class="empty"><div class="empty-icon">👤</div>Escribí al menos 2 caracteres</div>'; return;
+  }
+  const t = `%${q}%`;
+  const res = DB.exec(
+    `SELECT id,nombre,apellido,dni FROM clientes WHERE nombre LIKE ? OR apellido LIKE ? OR dni LIKE ? ORDER BY apellido,nombre LIMIT 20`,
+    [t,t,t]);
+  if (!res.length || !res[0].values.length) {
+    list.innerHTML = '<div class="empty"><div class="empty-icon">🤷</div>Sin resultados</div>'; return;
+  }
+  list.innerHTML = res[0].values.map(r => {
+    const [id,nom,ape,dni] = r;
+    const ini = `${(nom||'')[0]||''}${(ape||'')[0]||''}`.toUpperCase();
+    return `<div class="client-item" onclick="verCliente(${id})">
+      <div class="client-avatar">${ini}</div>
+      <div><div class="client-name">${ape||''} ${nom||''}</div><div class="client-dni">DNI ${dni||'—'}</div></div>
+      <div style="margin-left:auto;color:var(--muted);font-size:18px">›</div></div>`;
+  }).join('');
+}
+
+// ── FICHA CLIENTE ─────────────────────────────────────────
+function verCliente(id) {
+  const cl = DB.exec(`SELECT nombre,apellido,dni,telefono,localidad FROM clientes WHERE id=?`,[id]);
+  if (!cl.length) return;
+  const [nom,ape,dni,tel,loc] = cl[0].values[0];
+  const ini = `${(nom||'')[0]||''}${(ape||'')[0]||''}`.toUpperCase();
+  const pres = DB.exec(`SELECT id,monto_prestado,cantidad_cuotas,moneda,estado,fecha_inicio,tipo_sistema,frecuencia FROM prestamos WHERE cliente_id=? ORDER BY id DESC`,[id]);
+
+  document.getElementById('main').innerHTML = `
+    <div class="back-btn" onclick="mostrarBuscador()">‹ Volver</div>
+    <div class="client-header">
+      <div class="client-avatar-lg">${ini}</div>
+      <div>
+        <div class="client-info-name">${ape||''} ${nom||''}</div>
+        <div class="client-info-sub">DNI ${dni||'—'} · ${loc||'—'}</div>
+        ${tel?`<div class="client-tel">📞 ${tel}</div>`:''}
+      </div>
+    </div>
+    <div id="creditosWrap"></div>`;
+
+  const wrap = document.getElementById('creditosWrap');
+  if (!pres.length || !pres[0].values.length) {
+    wrap.innerHTML = '<div class="empty"><div class="empty-icon">📋</div>Sin créditos</div>'; return;
+  }
+  pres[0].values.forEach(p => {
+    const [pid,monto,cuotas,moneda,estado,fecha,sistema,freq] = p;
+    const bc = estado==='ACTIVO'?'badge-activo':estado==='CANCELADO'?'badge-cancelado':'badge-vencido';
+    const sym = moneda==='USD'?'U$S ':'$';
+    const card = document.createElement('div');
+    card.className = 'credito-card';
+    card.innerHTML = `
+      <div class="credito-header" onclick="toggleCredito(${pid},this)">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+            <span class="credito-id">#${pid}</span>
+            <span class="credito-monto">${sym}${Number(monto).toLocaleString('es-AR')}</span>
+          </div>
+          <div class="credito-meta">${cuotas} cuotas · ${sistema||''} · ${freq||''}</div>
+          <div class="credito-meta">${fecha?fecha.slice(0,10):'—'}</div>
+        </div>
+        <span class="credito-badge ${bc}">${estado}</span>
+        <span class="credito-chevron" id="chev-${pid}">▼</span>
+      </div>
+      <div id="detail-${pid}" style="display:none">
+        <div class="cuotas-wrap"><div class="spinner" id="spin-${pid}"></div></div>
+      </div>`;
+    wrap.appendChild(card);
+  });
+}
+
+function toggleCredito(pid, header) {
+  const detail = document.getElementById(`detail-${pid}`);
+  const chev   = document.getElementById(`chev-${pid}`);
+  const isOpen = detail.style.display !== 'none';
+  header.classList.toggle('open', !isOpen);
+  chev.classList.toggle('open', !isOpen);
+  detail.style.display = isOpen ? 'none' : 'block';
+  if (!isOpen && document.getElementById(`spin-${pid}`)) cargarCuotas(pid);
+}
+
+function cargarCuotas(pid) {
+  const wrap = document.querySelector(`#detail-${pid} .cuotas-wrap`);
+  const hoy  = new Date().toISOString().slice(0,10);
+  const pr   = DB.exec(`SELECT moneda FROM prestamos WHERE id=?`,[pid]);
+  const moneda = pr[0].values[0][0];
+  const sym  = moneda==='USD'?'U$S ':'$';
+
+  const cuotas = DB.exec(`
+    SELECT c.numero_cuota, c.fecha_vencimiento, c.monto_cuota, c.estado, c.capital_puro,
+           COALESCE((SELECT SUM(p.monto_pagado) FROM pagos p WHERE p.cuota_id=c.id),0) as pagado
+    FROM cuotas c WHERE c.prestamo_id=? ORDER BY c.numero_cuota`,[pid]);
+
+  if (!cuotas.length || !cuotas[0].values.length) {
+    wrap.innerHTML='<div class="empty">Sin cuotas</div>'; return;
+  }
+
+  const rows = cuotas[0].values;
+  let totalPagado=0, totalPendiente=0, cuotasVencidas=0;
+  rows.forEach(r=>{
+    const [,venc,monto,estado,,pagado]=r;
+    totalPagado+=pagado||0;
+    if(estado!=='PAGADA'){ totalPendiente+=Math.max(0,(monto||0)-(pagado||0)); if(venc&&venc<hoy) cuotasVencidas++; }
+  });
+
+  const cc = DB.exec(`
+    SELECT COALESCE(SUM(c.capital_puro)-SUM(COALESCE((SELECT SUM(p.capital_cubierto) FROM pagos p WHERE p.cuota_id=c.id),0)),0)
+    FROM cuotas c WHERE c.prestamo_id=? AND c.estado!='PAGADA'`,[pid]);
+  const enCalle = cc[0]?.values[0][0]||0;
+
+  const prox = DB.exec(`SELECT fecha_vencimiento,monto_cuota,numero_cuota FROM cuotas WHERE prestamo_id=? AND estado='PENDIENTE' ORDER BY numero_cuota LIMIT 1`,[pid]);
+  let proxHTML='';
+  if(prox.length&&prox[0].values.length){
+    const[fv,mc,nc]=prox[0].values[0];
+    const dias=Math.ceil((new Date(fv)-new Date(hoy))/86400000);
+    const color=dias<0?'danger':dias<=3?'accent':'ok';
+    const label=dias<0?`${Math.abs(dias)}d vencida`:dias===0?'HOY':`en ${dias}d`;
+    proxHTML=`<div class="res-item" style="grid-column:1/-1">
+      <div class="res-label">Próx. vencimiento — cuota ${nc}</div>
+      <div class="res-value ${color}">${fv} (${label})</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px">${sym}${Number(mc).toLocaleString('es-AR')}</div>
+    </div>`;
+  }
+
+  wrap.innerHTML=`
+    <div class="resumen-grid">
+      <div class="res-item"><div class="res-label">Total cobrado</div><div class="res-value ok">${sym}${Number(totalPagado).toLocaleString('es-AR')}</div></div>
+      <div class="res-item"><div class="res-label">Saldo pendiente</div><div class="res-value ${cuotasVencidas>0?'danger':'accent'}">${sym}${Number(totalPendiente).toLocaleString('es-AR')}</div></div>
+      <div class="res-item"><div class="res-label">Capital en calle</div><div class="res-value accent">${sym}${Number(enCalle).toLocaleString('es-AR')}</div></div>
+      <div class="res-item"><div class="res-label">Cuotas vencidas</div><div class="res-value ${cuotasVencidas>0?'danger':'ok'}">${cuotasVencidas}</div></div>
+      ${proxHTML}
+    </div>
+    <div style="font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Detalle de cuotas</div>
+    ${rows.map(r=>{
+      const[num,venc,monto,estado,,pagado]=r;
+      const est=estado==='PAGADA'?'PAGADA':(venc&&venc<hoy)?'VENCIDA':pagado>0?'PARCIAL':'PENDIENTE';
+      return `<div class="cuota-row">
+        <div class="cuota-num">${num}</div>
+        <div class="cuota-info">
+          <div class="cuota-venc">${venc||'—'}</div>
+          <div class="cuota-monto">${sym}${Number(monto).toLocaleString('es-AR')}
+            ${pagado>0&&estado!=='PAGADA'?`<span style="color:var(--muted);font-size:12px"> · pag ${sym}${Number(pagado).toLocaleString('es-AR')}</span>`:''}
+          </div>
+        </div>
+        <div class="cuota-estado estado-${est}">${est}</div>
+      </div>`;
+    }).join('')}`;
+}
+
+// ── VENCIDAS ──────────────────────────────────────────────
+function mostrarVencidos() {
+  const hoy = new Date().toISOString().slice(0,10);
+  const res = DB.exec(`
+    SELECT cl.apellido,cl.nombre,cl.telefono,c.fecha_vencimiento,c.monto_cuota,c.numero_cuota,pr.moneda,cl.id,
+           COALESCE((SELECT SUM(p.monto_pagado) FROM pagos p WHERE p.cuota_id=c.id),0) as pagado
+    FROM cuotas c JOIN prestamos pr ON c.prestamo_id=pr.id JOIN clientes cl ON pr.cliente_id=cl.id
+    WHERE c.estado!='PAGADA' AND c.fecha_vencimiento<=? ORDER BY c.fecha_vencimiento ASC LIMIT 50`,[hoy]);
+
+  document.getElementById('main').innerHTML=`<div class="back-btn" onclick="mostrarBuscador()">‹ Volver</div>`;
+  const step=document.createElement('div'); step.className='step';
+
+  if(!res.length||!res[0].values.length){
+    step.innerHTML=`<div class="step-title">⚠️ Cuotas vencidas</div><div class="empty"><div class="empty-icon">🎉</div>¡Sin cuotas vencidas!</div>`;
+  } else {
+    step.innerHTML=`<div class="step-title">⚠️ ${res[0].values.length} cuota(s) vencida(s)</div>`;
+    res[0].values.forEach(r=>{
+      const[ape,nom,tel,venc,monto,nCuota,moneda,cid,pagado]=r;
+      const sym=moneda==='USD'?'U$S ':'$';
+      const saldo=Math.max(0,(monto||0)-(pagado||0));
+      const dias=Math.ceil((new Date(hoy)-new Date(venc))/86400000);
+      step.innerHTML+=`<div class="client-item" onclick="verCliente(${cid})" style="flex-direction:column;align-items:flex-start;gap:4px">
+        <div style="display:flex;width:100%;align-items:center"><b>${ape} ${nom}</b>
+          <span style="margin-left:auto;font-size:11px;color:var(--danger);font-family:var(--mono)">${dias}d atraso</span></div>
+        <div style="font-size:12px;color:var(--muted)">Cuota ${nCuota} · venc. ${venc}</div>
+        <div style="font-size:14px;font-weight:700;color:var(--danger)">${sym}${Number(saldo).toLocaleString('es-AR')} pendiente</div>
+        ${tel?`<div style="font-size:12px;color:var(--accent)">📞 ${tel}</div>`:''}
+      </div>`;
+    });
+  }
+  document.getElementById('main').appendChild(step);
+}
+</script>
+</body>
+</html>
