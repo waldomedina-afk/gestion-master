@@ -582,7 +582,7 @@ function renderHerramientas() {
 
 // ── LISTA DE ESPERA ────────────────────────────────────
 function verEspera() {
-  const res=DB.exec(`SELECT id,tipo,descripcion,monto_total,monto_cubierto,moneda_pago,fecha_creacion,estado,observaciones FROM items_espera WHERE estado='PENDIENTE' ORDER BY fecha_creacion ASC`);
+  const res=DB.exec(`SELECT id,tipo,descripcion,monto_total,monto_cubierto,moneda_pago,fecha_creacion,estado,observaciones FROM items_espera WHERE UPPER(estado)='PENDIENTE' ORDER BY fecha_creacion ASC`);
   const el=document.getElementById('herramientasContent');
   el.innerHTML=`<div class="back-btn" onclick="renderHerramientas()">‹ Volver</div>`;
   const card=document.createElement('div'); card.className='card';
@@ -597,8 +597,8 @@ function verEspera() {
       card.innerHTML+=`<div class="espera-item">
         <div style="display:flex;justify-content:space-between;align-items:flex-start">
           <div>
-            <div style="font-size:11px;color:var(--muted);font-family:var(--mono)">#${id} · ${fecha?fecha.slice(0,10):'—'}</div>
-            <div style="font-weight:600;font-size:14px;margin-top:2px">${desc||tipo||'—'}</div>
+            <div style="font-size:11px;color:var(--muted);font-family:var(--mono)">#${id} · ${fecha?fecha.slice(0,10):'—'} · ${tipo||'—'}</div>
+            <div style="font-weight:600;font-size:14px;margin-top:2px">${desc||'—'}</div>
             ${obs?`<div style="font-size:12px;color:var(--muted);margin-top:2px">${obs}</div>`:''}
           </div>
           <div style="text-align:right;flex-shrink:0;margin-left:10px">
@@ -621,10 +621,13 @@ function verPagares() {
   const card=document.createElement('div'); card.className='card';
   card.innerHTML=`<div class="card-title">📄 Estado de pagarés</div>
     <div class="pill-row">
-      <div class="pill on" onclick="filtrarPagares('PARA LLEVAR',this)">Para llevar</div>
-      <div class="pill" onclick="filtrarPagares('EN MANOS DEL CLIENTE',this)">En cliente</div>
-      <div class="pill" onclick="filtrarPagares('FIRMADO',this)">Firmado</div>
-      <div class="pill" onclick="filtrarPagares('PERDIDO',this)">Perdido</div>
+      <div class="pill on"  onclick="filtrarPagares('PARA LLEVAR',this)">Para llevar</div>
+      <div class="pill"     onclick="filtrarPagares('EN OFICINA',this)">En oficina</div>
+      <div class="pill"     onclick="filtrarPagares('EN CAJA SEG',this)">Caja seg.</div>
+      <div class="pill"     onclick="filtrarPagares('TRAER',this)">Traer</div>
+      <div class="pill"     onclick="filtrarPagares('ENTREGADO',this)">Entregado</div>
+      <div class="pill"     onclick="filtrarPagares('ROTO',this)">Roto</div>
+      <div class="pill"     onclick="filtrarPagares('SIN PAGARE',this)">Sin pagaré</div>
     </div>
     <div id="pagaresLista"></div>`;
   el.appendChild(card);
@@ -639,8 +642,8 @@ function filtrarPagares(estado, pill) {
     WHERE UPPER(COALESCE(p.estado_pagare,'PARA LLEVAR'))=? AND p.estado!='CANCELADO'
     ORDER BY p.id DESC`,[estado.toUpperCase()]);
   const lista=document.getElementById('pagaresLista');
-  if(!res.length||!res[0].values.length){ lista.innerHTML='<div class="empty"><div class="empty-icon">📄</div>Sin pagarés</div>'; return; }
-  const claseMap={'PARA LLEVAR':'pe-llevar','EN MANOS DEL CLIENTE':'pe-cliente','FIRMADO':'pe-firmado','PERDIDO':'pe-perdido'};
+  if(!res.length||!res[0].values.length){ lista.innerHTML='<div class="empty"><div class="empty-icon">📄</div>Sin pagarés en este estado</div>'; return; }
+  const claseMap={'PARA LLEVAR':'pe-llevar','EN OFICINA':'pe-llevar','EN CAJA SEG':'pe-firmado','TRAER':'pe-cliente','ENTREGADO':'pe-firmado','ROTO':'pe-perdido','SIN PAGARE':'badge-grey'};
   lista.innerHTML=res[0].values.map(r=>{
     const[id,nom,dni,est,monto,moneda,fecha]=r;
     const sym=moneda==='USD'?'U$S ':'$';
