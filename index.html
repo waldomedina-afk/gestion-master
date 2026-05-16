@@ -582,7 +582,7 @@ function renderHerramientas() {
 
 // ── LISTA DE ESPERA ────────────────────────────────────
 function verEspera() {
-  const res=DB.exec(`SELECT id,tipo,descripcion,monto_total,monto_cubierto,moneda_pago,fecha_creacion,estado,observaciones FROM items_espera WHERE UPPER(estado)='PENDIENTE' ORDER BY fecha_creacion ASC`);
+  const res=DB.exec(`SELECT id,tipo,descripcion,monto_total,monto_cubierto,moneda_pago,fecha_creacion,estado,observaciones FROM items_espera WHERE UPPER(estado)!='COMPLETADO' ORDER BY fecha_creacion ASC`);
   const el=document.getElementById('herramientasContent');
   el.innerHTML=`<div class="back-btn" onclick="renderHerramientas()">‹ Volver</div>`;
   const card=document.createElement('div'); card.className='card';
