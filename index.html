@@ -284,7 +284,7 @@ async function descargarDB(fileId) {
     setProgress('Descargando...', 55);
     const res=await fetch(
       `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
-      {headers:{Authorization:`Bearer ${accessToken}`}});
+      {headers:{Authorization:`Bearer ${accessToken}`}, cache:'no-store'});
     setProgress('Procesando...', 85);
     DB=new SQL.Database(new Uint8Array(await res.arrayBuffer()));
     setProgress('¡Listo!', 100);
@@ -426,8 +426,8 @@ function cargarCuotas(pid) {
   if(!cuotas.length||!cuotas[0].values.length){ wrap.innerHTML='<div class="empty">Sin cuotas</div>'; return; }
   const rows=cuotas[0].values;
   let tPag=0,tPend=0,venc=0;
-  rows.forEach(r=>{ const[,fv,m,est,,pag]=r; tPag+=pag||0; if(est!=='PAGADA'){ tPend+=Math.max(0,(m||0)-(pag||0)); if(fv&&fv<h) venc++; } });
-  const cc=DB.exec(`SELECT COALESCE(SUM(c.capital_puro)-SUM(COALESCE((SELECT SUM(p.capital_cubierto) FROM pagos p WHERE p.cuota_id=c.id),0)),0) FROM cuotas c WHERE c.prestamo_id=? AND c.estado!='PAGADA'`,[pid]);
+  rows.forEach(r=>{ const[,fv,m,est,,pag]=r; tPag+=pag||0; if(est!=='PAGADO'){ tPend+=Math.max(0,(m||0)-(pag||0)); if(fv&&fv<h) venc++; } });
+  const cc=DB.exec(`SELECT COALESCE(SUM(c.capital_puro)-SUM(COALESCE((SELECT SUM(p.capital_cubierto) FROM pagos p WHERE p.cuota_id=c.id),0)),0) FROM cuotas c WHERE c.prestamo_id=? AND c.estado!='PAGADO'`,[pid]);
   const enCalle=cc[0]?.values[0][0]||0;
   const prox=DB.exec(`SELECT fecha_vencimiento,monto_cuota,numero_cuota FROM cuotas WHERE prestamo_id=? AND estado='PENDIENTE' ORDER BY numero_cuota LIMIT 1`,[pid]);
   let proxHTML='';
@@ -453,14 +453,14 @@ function cargarCuotas(pid) {
     <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Detalle</div>
     ${rows.map(r=>{
       const[num,fv,m,est,,pag]=r;
-      const est2=est==='PAGADA'?'PAGADA':(fv&&fv<h)?'VENCIDA':pag>0?'PARCIAL':'PENDIENTE';
-      const bc={'PAGADA':'badge-ok','VENCIDA':'badge-venc','PARCIAL':'badge-parc','PENDIENTE':'badge-pend'}[est2];
+      const est2=est==='PAGADO'?'PAGADO':(fv&&fv<h)?'VENCIDA':pag>0?'PARCIAL':'PENDIENTE';
+      const bc={'PAGADO':'badge-ok','VENCIDA':'badge-venc','PARCIAL':'badge-parc','PENDIENTE':'badge-pend'}[est2];
       return `<div class="cuota-row">
         <div class="cuota-num">${num}</div>
         <div class="cuota-info">
           <div class="cuota-venc">${fv||'—'}</div>
           <div class="cuota-monto-txt">${sym}${Number(m).toLocaleString('es-AR')}
-            ${pag>0&&est!=='PAGADA'?`<span style="color:var(--muted);font-size:11px"> · pag ${sym}${Number(pag).toLocaleString('es-AR')}</span>`:''}
+            ${pag>0&&est!=='PAGADO'?`<span style="color:var(--muted);font-size:11px"> · pag ${sym}${Number(pag).toLocaleString('es-AR')}</span>`:''}
           </div>
         </div>
         <div class="badge ${bc}">${est2}</div>
@@ -475,7 +475,7 @@ function verVencidas() {
     SELECT cl.apellido,cl.nombre,cl.telefono,c.fecha_vencimiento,c.monto_cuota,c.numero_cuota,pr.moneda,cl.id,
            COALESCE((SELECT SUM(p.monto_pagado) FROM pagos p WHERE p.cuota_id=c.id),0) pagado
     FROM cuotas c JOIN prestamos pr ON c.prestamo_id=pr.id JOIN clientes cl ON pr.cliente_id=cl.id
-    WHERE c.estado!='PAGADA' AND c.fecha_vencimiento<=? ORDER BY c.fecha_vencimiento ASC LIMIT 60`,[h]);
+    WHERE c.estado!='PAGADO' AND c.fecha_vencimiento<=? ORDER BY c.fecha_vencimiento ASC LIMIT 60`,[h]);
   const el=document.getElementById('clientesContent');
   el.innerHTML=`<div class="back-btn" onclick="renderClientes()">‹ Volver</div>`;
   const card=document.createElement('div'); card.className='card';
@@ -549,10 +549,10 @@ function renderCaja() {
   html+=`</div></div>`;
 
   // Capital total en calle
-  const capitalArs=DB.exec(`SELECT COALESCE(SUM(c.capital_puro)-SUM(COALESCE((SELECT SUM(p.capital_cubierto) FROM pagos p WHERE p.cuota_id=c.id),0)),0) FROM cuotas c JOIN prestamos pr ON c.prestamo_id=pr.id WHERE c.estado!='PAGADA' AND pr.moneda='ARS'`)[0]?.values[0][0]||0;
-  const capitalUsd=DB.exec(`SELECT COALESCE(SUM(c.capital_puro)-SUM(COALESCE((SELECT SUM(p.capital_cubierto) FROM pagos p WHERE p.cuota_id=c.id),0)),0) FROM cuotas c JOIN prestamos pr ON c.prestamo_id=pr.id WHERE c.estado!='PAGADA' AND pr.moneda='USD'`)[0]?.values[0][0]||0;
+  const capitalArs=DB.exec(`SELECT COALESCE(SUM(c.capital_puro)-SUM(COALESCE((SELECT SUM(p.capital_cubierto) FROM pagos p WHERE p.cuota_id=c.id),0)),0) FROM cuotas c JOIN prestamos pr ON c.prestamo_id=pr.id WHERE c.estado!='PAGADO' AND pr.moneda='ARS'`)[0]?.values[0][0]||0;
+  const capitalUsd=DB.exec(`SELECT COALESCE(SUM(c.capital_puro)-SUM(COALESCE((SELECT SUM(p.capital_cubierto) FROM pagos p WHERE p.cuota_id=c.id),0)),0) FROM cuotas c JOIN prestamos pr ON c.prestamo_id=pr.id WHERE c.estado!='PAGADO' AND pr.moneda='USD'`)[0]?.values[0][0]||0;
   const credActivos=DB.exec(`SELECT COUNT(*) FROM prestamos WHERE estado='ACTIVO'`)[0]?.values[0][0]||0;
-  const vencHoy=DB.exec(`SELECT COUNT(*) FROM cuotas WHERE estado!='PAGADA' AND fecha_vencimiento<=?`,[hoy()])[0]?.values[0][0]||0;
+  const vencHoy=DB.exec(`SELECT COUNT(*) FROM cuotas WHERE estado!='PAGADO' AND fecha_vencimiento<=?`,[hoy()])[0]?.values[0][0]||0;
 
   html+=`<div class="card"><div class="card-title">📊 Resumen cartera</div>
     <div class="res-grid">
