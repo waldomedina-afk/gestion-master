@@ -414,6 +414,11 @@ function cargarCuotas(pid) {
   const h=hoy();
   const pr=DB.exec(`SELECT moneda FROM prestamos WHERE id=?`,[pid]);
   const moneda=pr[0].values[0][0]; const sym=moneda==='USD'?'U$S ':'$';
+
+  // Tasa mora diaria (desde configuracion, default 1%)
+  const tasaRow=DB.exec(`SELECT valor FROM configuracion WHERE clave='tasa_mora_diaria'`);
+  const MORA_DIARIA=(tasaRow.length&&tasaRow[0].values.length)?parseFloat(tasaRow[0].values[0][0])||1:1;
+
   const cuotas=DB.exec(`
     SELECT c.numero_cuota,c.fecha_vencimiento,c.monto_cuota,c.estado,
            COALESCE((SELECT SUM(p.monto_pagado) FROM pagos p WHERE p.cuota_id=c.id),0) pagado
@@ -450,12 +455,29 @@ function cargarCuotas(pid) {
       const[num,fv,m,est,,pag]=r;
       const est2=est==='PAGADO'?'PAGADO':(fv&&fv<h)?'VENCIDA':pag>0?'PARCIAL':'PENDIENTE';
       const bc={'PAGADO':'badge-ok','VENCIDA':'badge-venc','PARCIAL':'badge-parc','PENDIENTE':'badge-pend'}[est2];
+      const saldo=Math.max(0,(m||0)-(pag||0));
+
+      // Calcular mora si está vencida
+      let moraHTML='';
+      if(est2==='VENCIDA'&&saldo>0){
+        const diasAtraso=Math.ceil((new Date(h)-new Date(fv))/86400000);
+        if(diasAtraso>0){
+          const mora=Math.round(saldo*(MORA_DIARIA/100)*diasAtraso);
+          const total=saldo+mora;
+          moraHTML=`<span style="color:var(--danger);font-size:11px;margin-left:6px">
+            + recargo ${sym}${Number(mora).toLocaleString('es-AR')} = 
+            <b>${sym}${Number(total).toLocaleString('es-AR')}</b>
+          </span>`;
+        }
+      }
+
       return `<div class="cuota-row">
         <div class="cuota-num">${num}</div>
         <div class="cuota-info">
           <div class="cuota-venc">${fv||'—'}</div>
           <div class="cuota-monto-txt">${sym}${Number(m).toLocaleString('es-AR')}
             ${pag>0&&est!=='PAGADO'?`<span style="color:var(--muted);font-size:11px"> · pag ${sym}${Number(pag).toLocaleString('es-AR')}</span>`:''}
+            ${moraHTML}
           </div>
         </div>
         <div class="badge ${bc}">${est2}</div>
