@@ -36,7 +36,7 @@
   /* CARDS */
   .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;animation:fadeUp .25s ease both}
   @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-  .card-title{font-size:11px;font-weight:600;letter-spacing:1.5px;color:var(--accent);text-transform:uppercase;margin-bottom:12px}
+  .card-title{font-size:13px;font-weight:600;letter-spacing:1.5px;color:var(--accent);text-transform:uppercase;margin-bottom:12px}
 
   /* BUTTONS */
   .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;border-radius:8px;border:none;cursor:pointer;font-family:var(--sans);font-size:14px;font-weight:600;transition:all .15s}
@@ -61,19 +61,19 @@
   /* SALDOS */
   .saldo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   .saldo-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px}
-  .saldo-cuenta{font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
-  .saldo-monto{font-size:18px;font-weight:700;font-family:var(--mono)}
+  .saldo-cuenta{font-size:12px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
+  .saldo-monto{font-size:20px;font-weight:700;font-family:var(--mono)}
   .saldo-monto.pos{color:var(--ok)}.saldo-monto.neg{color:var(--danger)}
-  .saldo-usd{font-size:13px;color:#81D4FA;font-family:var(--mono);margin-top:2px}
+  .saldo-usd{font-size:14px;color:#81D4FA;font-family:var(--mono);margin-top:2px}
 
   /* CUOTA ROWS */
   .cuota-row{display:flex;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);gap:10px}
   .cuota-row:last-child{border-bottom:none}
   .cuota-num{font-family:var(--mono);font-size:11px;color:var(--muted);width:26px;flex-shrink:0;text-align:center}
   .cuota-info{flex:1;min-width:0}
-  .cuota-venc{font-size:11px;color:var(--muted)}
-  .cuota-monto-txt{font-size:14px;font-weight:600}
-  .badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;flex-shrink:0}
+  .cuota-venc{font-size:12px;color:var(--muted)}
+  .cuota-monto-txt{font-size:15px;font-weight:600}
+  .badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:10px;flex-shrink:0}
   .badge-ok{background:#0A2E1A;color:var(--ok)}
   .badge-pend{background:#0A1F3A;color:var(--accent)}
   .badge-venc{background:#2E0A0A;color:var(--danger)}
@@ -97,21 +97,21 @@
   /* RESUMEN */
   .res-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
   .res-item{background:var(--surface);border-radius:8px;padding:10px 12px}
-  .res-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
-  .res-val{font-size:16px;font-weight:700;margin-top:3px;font-family:var(--mono)}
+  .res-label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+  .res-val{font-size:17px;font-weight:700;margin-top:3px;font-family:var(--mono)}
   .res-val.ok{color:var(--ok)}.res-val.danger{color:var(--danger)}.res-val.accent{color:var(--accent2)}
 
   /* SIMULADOR */
   .sim-input-wrap{margin-bottom:10px}
-  .sim-label{font-size:11px;color:var(--muted);margin-bottom:4px;display:block;text-transform:uppercase;letter-spacing:.8px}
-  .sim-input{width:100%;padding:11px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:16px;font-family:var(--mono);outline:none;transition:border-color .2s}
+  .sim-label{font-size:13px;color:var(--muted);margin-bottom:4px;display:block;text-transform:uppercase;letter-spacing:.8px}
+  .sim-input{width:100%;padding:13px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:18px;font-family:var(--mono);outline:none;transition:border-color .2s}
   .sim-input:focus{border-color:var(--accent)}
   .sim-result{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;margin-top:12px}
-  .sim-cuota-big{font-size:28px;font-weight:700;color:var(--accent);font-family:var(--mono);text-align:center;margin:8px 0}
-  .sim-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}
-  .sim-table th{color:var(--muted);font-weight:600;padding:6px 4px;text-align:right;border-bottom:1px solid var(--border);font-size:10px;letter-spacing:.5px}
+  .sim-cuota-big{font-size:30px;font-weight:700;color:var(--accent);font-family:var(--mono);text-align:center;margin:8px 0}
+  .sim-table{width:100%;border-collapse:collapse;font-size:15px;margin-top:10px}
+  .sim-table th{color:var(--muted);font-weight:600;padding:8px 6px;text-align:right;border-bottom:1px solid var(--border);font-size:12px;letter-spacing:.5px}
   .sim-table th:first-child{text-align:left}
-  .sim-table td{padding:7px 4px;border-bottom:1px solid var(--border);text-align:right;font-family:var(--mono)}
+  .sim-table td{padding:10px 6px;border-bottom:1px solid var(--border);text-align:right;font-family:var(--mono)}
   .sim-table td:first-child{text-align:left;color:var(--muted)}
   .sim-table tr:last-child td{border-bottom:none}
 
@@ -336,6 +336,7 @@ function renderClientes() {
     </div>
     <div class="card">
       <div class="card-title">⚡ Accesos rápidos</div>
+      <button class="btn btn-secondary" onclick="verCobrosDelDia()">📅 Cobros del día</button>
       <button class="btn btn-secondary" onclick="verVencidas()">⚠️ Cuotas vencidas hoy</button>
       <button class="btn btn-secondary" onclick="refrescarDrive()">🔄 Actualizar desde Drive</button>
     </div>`;
@@ -462,17 +463,25 @@ function cargarCuotas(pid) {
       const bc={'PAGADO':'badge-ok','VENCIDA':'badge-venc','PARCIAL':'badge-parc','PENDIENTE':'badge-pend'}[est2];
       const saldo=Math.max(0,(m||0)-(pag||0));
 
-      // Calcular mora si está vencida
-      let moraHTML='';
-      if(est2==='VENCIDA'&&saldo>0){
+      // Línea de saldo parcial
+      let saldoLine='';
+      if(pag>0&&est2!=='PAGADO'){
+        saldoLine=`<div style="font-size:11px;color:var(--muted);margin-top:1px">
+          Pagado: ${sym}${Number(pag).toLocaleString('es-AR')} · Saldo: ${sym}${Number(saldo).toLocaleString('es-AR')}
+        </div>`;
+      }
+
+      // Línea c/recargo (vencida o parcial vencida)
+      let recLine='';
+      if((est2==='VENCIDA'||est2==='PARCIAL')&&saldo>0&&fv&&fv<h){
         const diasAtraso=Math.ceil((new Date(h)-new Date(fv))/86400000);
         if(diasAtraso>0){
           const mora=Math.round(saldo*(MORA_DIARIA/100)*diasAtraso);
           const total=saldo+mora;
-          moraHTML=`<span style="color:var(--danger);font-size:11px;margin-left:6px">
-            + recargo ${sym}${Number(mora).toLocaleString('es-AR')} = 
-            <b>${sym}${Number(total).toLocaleString('es-AR')}</b>
-          </span>`;
+          recLine=`<div style="font-size:12px;font-weight:700;color:var(--accent2);margin-top:3px">
+            C/recargo: ${sym}${Number(total).toLocaleString('es-AR')}
+            <span style="font-weight:400;font-size:10px;color:var(--muted)">(+${sym}${Number(mora).toLocaleString('es-AR')} · ${diasAtraso}d)</span>
+          </div>`;
         }
       }
 
@@ -480,10 +489,8 @@ function cargarCuotas(pid) {
         <div class="cuota-num">${num}</div>
         <div class="cuota-info">
           <div class="cuota-venc">${fv||'—'}</div>
-          <div class="cuota-monto-txt">${sym}${Number(m).toLocaleString('es-AR')}
-            ${pag>0&&est!=='PAGADO'?`<span style="color:var(--muted);font-size:11px"> · pag ${sym}${Number(pag).toLocaleString('es-AR')}</span>`:''}
-            ${moraHTML}
-          </div>
+          <div class="cuota-monto-txt">${sym}${Number(m).toLocaleString('es-AR')}</div>
+          ${saldoLine}${recLine}
         </div>
         <div class="badge ${bc}">${est2}</div>
       </div>`;
@@ -524,68 +531,202 @@ function verVencidas() {
 // ══════════════════════════════════════════════════════
 //  SECCIÓN CAJA
 // ══════════════════════════════════════════════════════
-function renderCaja() {
-  const el=document.getElementById('cajaContent');
-  el.innerHTML='<div class="spinner"></div>';
+let fechaCaja = hoy();
+let cuentaActual = null;
 
-  // Obtener cuentas únicas
-  const cuentasRes=DB.exec(`
+function renderCaja() {
+  cuentaActual = null;
+  const el = document.getElementById('cajaContent');
+  el.innerHTML = '<div class="spinner"></div>';
+
+  // Cuentas únicas
+  const cuentasRes = DB.exec(`
     SELECT DISTINCT cuenta FROM (
       SELECT cuenta_origen cuenta FROM gastos
       UNION SELECT cuenta_destino cuenta FROM ingresos_extra
       UNION SELECT cuenta_origen cuenta FROM prestamos WHERE estado!='EN_ESPERA'
       UNION SELECT cuenta_destino cuenta FROM pagos
-    ) WHERE cuenta IS NOT NULL AND cuenta!='' AND cuenta!='LISTA_ESPERA'`);
+    ) WHERE cuenta IS NOT NULL AND cuenta!='' AND cuenta!='LISTA_ESPERA' AND cuenta NOT LIKE 'TRANSF_A_%' AND cuenta NOT LIKE 'CALCE_%'`);
 
-  let cuentas=['CAJA_CHICA','CAJA_MAYOR'];
-  if(cuentasRes.length&&cuentasRes[0].values.length){
-    const todas=cuentasRes[0].values.map(r=>r[0]);
-    todas.forEach(c=>{ if(!cuentas.includes(c)) cuentas.push(c); });
+  let cuentas = ['CAJA_CHICA','CAJA_MAYOR'];
+  if (cuentasRes.length && cuentasRes[0].values.length) {
+    cuentasRes[0].values.map(r=>r[0]).forEach(c=>{ if(!cuentas.includes(c)) cuentas.push(c); });
   }
 
-  let html=`<div class="card"><div class="card-title">💰 Saldos actuales</div><div class="saldo-grid">`;
-  cuentas.forEach(cta=>{
-    const iArs=DB.exec(`SELECT COALESCE(SUM(monto),0) FROM ingresos_extra WHERE cuenta_destino=? AND moneda='ARS'`,[cta])[0]?.values[0][0]||0;
-    const iArs2=DB.exec(`SELECT COALESCE(SUM(monto_pagado),0) FROM pagos p JOIN cuotas c ON p.cuota_id=c.id JOIN prestamos pr ON c.prestamo_id=pr.id WHERE p.cuenta_destino=? AND pr.moneda='ARS'`,[cta])[0]?.values[0][0]||0;
-    const iArs3=DB.exec(`SELECT COALESCE(SUM(monto),0) FROM transferencias WHERE destino=? AND moneda='ARS'`,[cta])[0]?.values[0][0]||0;
-    const eArs=DB.exec(`SELECT COALESCE(SUM(monto),0) FROM gastos WHERE cuenta_origen=? AND moneda='ARS'`,[cta])[0]?.values[0][0]||0;
-    const eArs2=DB.exec(`SELECT COALESCE(SUM(monto),0) FROM transferencias WHERE origen=? AND moneda='ARS'`,[cta])[0]?.values[0][0]||0;
-    const eArs3=DB.exec(`SELECT COALESCE(SUM(monto_prestado),0) FROM prestamos WHERE cuenta_origen=? AND moneda='ARS' AND estado!='EN_ESPERA'`,[cta])[0]?.values[0][0]||0;
-    const sArs=(iArs+iArs2+iArs3)-(eArs+eArs2+eArs3);
+  const ctaNom = c => ({'CAJA_CHICA':'Caja chica','CAJA_MAYOR':'Caja mayor'}[c] || c.replace(/_/g,' '));
+  const ctaColor = c => c==='CAJA_MAYOR'?'#FFA726':c.includes('BANCO')?'#42A5F5':'#66BB6A';
 
-    const iUsd=DB.exec(`SELECT COALESCE(SUM(monto),0) FROM ingresos_extra WHERE cuenta_destino=? AND moneda='USD'`,[cta])[0]?.values[0][0]||0;
-    const iUsd2=DB.exec(`SELECT COALESCE(SUM(monto_pagado),0) FROM pagos p JOIN cuotas c ON p.cuota_id=c.id JOIN prestamos pr ON c.prestamo_id=pr.id WHERE p.cuenta_destino=? AND pr.moneda='USD'`,[cta])[0]?.values[0][0]||0;
-    const iUsd3=DB.exec(`SELECT COALESCE(SUM(monto),0) FROM transferencias WHERE destino=? AND moneda='USD'`,[cta])[0]?.values[0][0]||0;
-    const eUsd=DB.exec(`SELECT COALESCE(SUM(monto),0) FROM gastos WHERE cuenta_origen=? AND moneda='USD'`,[cta])[0]?.values[0][0]||0;
-    const eUsd2=DB.exec(`SELECT COALESCE(SUM(monto),0) FROM transferencias WHERE origen=? AND moneda='USD'`,[cta])[0]?.values[0][0]||0;
-    const eUsd3=DB.exec(`SELECT COALESCE(SUM(monto_prestado),0) FROM prestamos WHERE cuenta_origen=? AND moneda='USD' AND estado!='EN_ESPERA'`,[cta])[0]?.values[0][0]||0;
-    const sUsd=(iUsd+iUsd2+iUsd3)-(eUsd+eUsd2+eUsd3);
+  let gridHTML = '';
+  cuentas.forEach(cta => {
+    const iArs = DB.exec(`SELECT COALESCE(SUM(monto),0) FROM ingresos_extra WHERE cuenta_destino=? AND moneda='ARS'`,[cta])[0]?.values[0][0]||0;
+    const iArs2 = DB.exec(`SELECT COALESCE(SUM(monto_pagado),0) FROM pagos p JOIN cuotas c ON p.cuota_id=c.id JOIN prestamos pr ON c.prestamo_id=pr.id WHERE p.cuenta_destino=? AND pr.moneda='ARS'`,[cta])[0]?.values[0][0]||0;
+    const iArs3 = DB.exec(`SELECT COALESCE(SUM(monto),0) FROM transferencias WHERE destino=? AND moneda='ARS'`,[cta])[0]?.values[0][0]||0;
+    const eArs = DB.exec(`SELECT COALESCE(SUM(monto),0) FROM gastos WHERE cuenta_origen=? AND moneda='ARS'`,[cta])[0]?.values[0][0]||0;
+    const eArs2 = DB.exec(`SELECT COALESCE(SUM(monto),0) FROM transferencias WHERE origen=? AND moneda='ARS'`,[cta])[0]?.values[0][0]||0;
+    const eArs3 = DB.exec(`SELECT COALESCE(SUM(monto_prestado),0) FROM prestamos WHERE cuenta_origen=? AND moneda='ARS' AND estado!='EN_ESPERA'`,[cta])[0]?.values[0][0]||0;
+    const sArs = (iArs+iArs2+iArs3)-(eArs+eArs2+eArs3);
 
-    const color=cta==='CAJA_MAYOR'?'#FFA726':cta.includes('BANCO')?'#42A5F5':'#66BB6A';
-    html+=`<div class="saldo-card">
-      <div class="saldo-cuenta" style="color:${color}">${cta.replace('_',' ')}</div>
+    const iUsd = DB.exec(`SELECT COALESCE(SUM(monto),0) FROM ingresos_extra WHERE cuenta_destino=? AND moneda='USD'`,[cta])[0]?.values[0][0]||0;
+    const iUsd2 = DB.exec(`SELECT COALESCE(SUM(monto_pagado),0) FROM pagos p JOIN cuotas c ON p.cuota_id=c.id JOIN prestamos pr ON c.prestamo_id=pr.id WHERE p.cuenta_destino=? AND pr.moneda='USD'`,[cta])[0]?.values[0][0]||0;
+    const iUsd3 = DB.exec(`SELECT COALESCE(SUM(monto),0) FROM transferencias WHERE destino=? AND moneda='USD'`,[cta])[0]?.values[0][0]||0;
+    const eUsd = DB.exec(`SELECT COALESCE(SUM(monto),0) FROM gastos WHERE cuenta_origen=? AND moneda='USD'`,[cta])[0]?.values[0][0]||0;
+    const eUsd2 = DB.exec(`SELECT COALESCE(SUM(monto),0) FROM transferencias WHERE origen=? AND moneda='USD'`,[cta])[0]?.values[0][0]||0;
+    const eUsd3 = DB.exec(`SELECT COALESCE(SUM(monto_prestado),0) FROM prestamos WHERE cuenta_origen=? AND moneda='USD' AND estado!='EN_ESPERA'`,[cta])[0]?.values[0][0]||0;
+    const sUsd = (iUsd+iUsd2+iUsd3)-(eUsd+eUsd2+eUsd3);
+
+    gridHTML += `<div class="saldo-card" onclick="verMovimientosCuenta('${cta}')" style="cursor:pointer;active:opacity:.7">
+      <div class="saldo-cuenta" style="color:${ctaColor(cta)}">${ctaNom(cta)} <span style="font-size:9px;color:var(--muted)">▶</span></div>
       <div class="saldo-monto ${sArs>=0?'pos':'neg'}">${fmt(sArs)}</div>
       ${sUsd!==0?`<div class="saldo-usd">U$S ${Number(sUsd).toLocaleString('es-AR')}</div>`:''}
     </div>`;
   });
-  html+=`</div></div>`;
 
-  // Capital total en calle
-  const capitalArs=DB.exec(`SELECT COALESCE(SUM(c.capital_puro)-SUM(COALESCE((SELECT SUM(p.capital_cubierto) FROM pagos p WHERE p.cuota_id=c.id),0)),0) FROM cuotas c JOIN prestamos pr ON c.prestamo_id=pr.id WHERE c.estado!='PAGADO' AND pr.moneda='ARS'`)[0]?.values[0][0]||0;
-  const capitalUsd=DB.exec(`SELECT COALESCE(SUM(c.capital_puro)-SUM(COALESCE((SELECT SUM(p.capital_cubierto) FROM pagos p WHERE p.cuota_id=c.id),0)),0) FROM cuotas c JOIN prestamos pr ON c.prestamo_id=pr.id WHERE c.estado!='PAGADO' AND pr.moneda='USD'`)[0]?.values[0][0]||0;
-  const credActivos=DB.exec(`SELECT COUNT(*) FROM prestamos WHERE estado='ACTIVO'`)[0]?.values[0][0]||0;
-  const vencHoy=DB.exec(`SELECT COUNT(*) FROM cuotas WHERE estado!='PAGADO' AND fecha_vencimiento<=?`,[hoy()])[0]?.values[0][0]||0;
+  const capitalArs = DB.exec(`SELECT COALESCE(SUM(c.capital_puro)-SUM(COALESCE((SELECT SUM(p.capital_cubierto) FROM pagos p WHERE p.cuota_id=c.id),0)),0) FROM cuotas c JOIN prestamos pr ON c.prestamo_id=pr.id WHERE c.estado!='PAGADO' AND pr.moneda='ARS'`)[0]?.values[0][0]||0;
+  const capitalUsd = DB.exec(`SELECT COALESCE(SUM(c.capital_puro)-SUM(COALESCE((SELECT SUM(p.capital_cubierto) FROM pagos p WHERE p.cuota_id=c.id),0)),0) FROM cuotas c JOIN prestamos pr ON c.prestamo_id=pr.id WHERE c.estado!='PAGADO' AND pr.moneda='USD'`)[0]?.values[0][0]||0;
+  const credActivos = DB.exec(`SELECT COUNT(*) FROM prestamos WHERE estado='ACTIVO'`)[0]?.values[0][0]||0;
+  const vencHoy = DB.exec(`SELECT COUNT(*) FROM cuotas WHERE estado!='PAGADO' AND fecha_vencimiento<=?`,[hoy()])[0]?.values[0][0]||0;
 
-  html+=`<div class="card"><div class="card-title">📊 Resumen cartera</div>
-    <div class="res-grid">
-      <div class="res-item"><div class="res-label">Capital en calle ARS</div><div class="res-val accent">${fmt(capitalArs)}</div></div>
-      <div class="res-item"><div class="res-label">Capital en calle USD</div><div class="res-val accent">U$S ${Number(capitalUsd).toLocaleString('es-AR')}</div></div>
-      <div class="res-item"><div class="res-label">Créditos activos</div><div class="res-val ok">${credActivos}</div></div>
-      <div class="res-item"><div class="res-label">Cuotas vencidas</div><div class="res-val ${vencHoy>0?'danger':'ok'}">${vencHoy}</div></div>
+  el.innerHTML = `
+    <div class="card">
+      <div class="card-title">💰 Saldos — tocá una caja para ver movimientos</div>
+      <div class="saldo-grid">${gridHTML}</div>
     </div>
-  </div>`;
+    <div class="card"><div class="card-title">📊 Resumen cartera</div>
+      <div class="res-grid">
+        <div class="res-item"><div class="res-label">Capital en calle ARS</div><div class="res-val accent">${fmt(capitalArs)}</div></div>
+        <div class="res-item"><div class="res-label">Capital en calle USD</div><div class="res-val accent">U$S ${Number(capitalUsd).toLocaleString('es-AR')}</div></div>
+        <div class="res-item"><div class="res-label">Créditos activos</div><div class="res-val ok">${credActivos}</div></div>
+        <div class="res-item"><div class="res-label">Cuotas vencidas</div><div class="res-val ${vencHoy>0?'danger':'ok'}">${vencHoy}</div></div>
+      </div>
+    </div>`;
+}
 
-  el.innerHTML=html;
+function verMovimientosCuenta(cta) {
+  cuentaActual = cta;
+  fechaCaja = hoy();
+  const ctaNom = c => ({'CAJA_CHICA':'Caja chica','CAJA_MAYOR':'Caja mayor'}[c] || c.replace(/_/g,' '));
+  const el = document.getElementById('cajaContent');
+  el.innerHTML = `
+    <div class="back-btn" onclick="renderCaja()">‹ Volver</div>
+    <div class="card">
+      <div class="card-title">💳 ${ctaNom(cta).toUpperCase()}</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:14px">
+        <button onclick="cambiarDiaCaja(-1)" style="background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:7px 16px;font-size:18px;cursor:pointer">◀</button>
+        <span id="lblFechaCaja" style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--accent)"></span>
+        <button onclick="cambiarDiaCaja(1)" style="background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:7px 16px;font-size:18px;cursor:pointer">▶</button>
+        <button onclick="fechaCaja=hoy();cargarMovCaja()" style="background:var(--accent);color:#000;border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer">HOY</button>
+      </div>
+      <div id="listaCaja"></div>
+    </div>`;
+  cargarMovCaja();
+}
+
+function cambiarDiaCaja(delta) {
+  const d = new Date(fechaCaja + 'T12:00:00');
+  d.setDate(d.getDate() + delta);
+  fechaCaja = d.toISOString().slice(0, 10);
+  cargarMovCaja();
+}
+
+function cargarMovCaja() {
+  const lista = document.getElementById('listaCaja');
+  const lbl = document.getElementById('lblFechaCaja');
+  if (!lista || !lbl || !cuentaActual) return;
+  const partes = fechaCaja.split('-');
+  lbl.textContent = `${partes[2]}/${partes[1]}/${partes[0]}`;
+  const cta = cuentaActual;
+  const filas = [];
+
+  // Cobros de cuotas (ingreso)
+  const cobros = DB.exec(`
+    SELECT cl.apellido||' '||cl.nombre, cu.numero_cuota, p.monto_pagado, pr.moneda
+    FROM pagos p JOIN cuotas cu ON p.cuota_id=cu.id JOIN prestamos pr ON cu.prestamo_id=pr.id JOIN clientes cl ON pr.cliente_id=cl.id
+    WHERE p.cuenta_destino=? AND date(p.fecha_real_pago)=?
+    ORDER BY p.id DESC`,[cta, fechaCaja]);
+  (cobros[0]?.values||[]).forEach(r=>{
+    const[nom,nc,m,mon]=r; const sym=mon==='USD'?'U$S ':'$';
+    filas.push({tipo:'ing',label:`${nom}`,sub:`Cobro cuota ${nc}`,monto:m,sym,mon});
+  });
+
+  // Ingresos extra (ingreso)
+  const ingEx = DB.exec(`
+    SELECT descripcion, monto, moneda FROM ingresos_extra
+    WHERE cuenta_destino=? AND fecha=?
+    ORDER BY id DESC`,[cta, fechaCaja]);
+  (ingEx[0]?.values||[]).forEach(r=>{
+    const[desc,m,mon]=r; const sym=mon==='USD'?'U$S ':'$';
+    filas.push({tipo:'ing',label:desc||'Ingreso',sub:'Ingreso extra',monto:m,sym,mon});
+  });
+
+  // Transferencias entrantes (ingreso)
+  const trIn = DB.exec(`
+    SELECT descripcion, monto, moneda, origen FROM transferencias
+    WHERE destino=? AND fecha=?
+    ORDER BY id DESC`,[cta, fechaCaja]);
+  (trIn[0]?.values||[]).forEach(r=>{
+    const[desc,m,mon,ori]=r; const sym=mon==='USD'?'U$S ':'$';
+    filas.push({tipo:'ing',label:desc||'Transferencia',sub:`Desde ${(ori||'—').replace(/_/g,' ')}`,monto:m,sym,mon});
+  });
+
+  // Gastos (egreso)
+  const gastos = DB.exec(`
+    SELECT descripcion, monto, moneda FROM gastos
+    WHERE cuenta_origen=? AND fecha=?
+    ORDER BY id DESC`,[cta, fechaCaja]);
+  (gastos[0]?.values||[]).forEach(r=>{
+    const[desc,m,mon]=r; const sym=mon==='USD'?'U$S ':'$';
+    filas.push({tipo:'eg',label:desc||'Gasto',sub:'Egreso',monto:m,sym,mon});
+  });
+
+  // Otorgamientos (egreso)
+  const otorg = DB.exec(`
+    SELECT cl.apellido||' '||cl.nombre, pr.id, pr.monto_prestado, pr.moneda
+    FROM prestamos pr JOIN clientes cl ON pr.cliente_id=cl.id
+    WHERE pr.cuenta_origen=? AND pr.fecha_inicio=? AND pr.estado!='EN_ESPERA'
+    ORDER BY pr.id DESC`,[cta, fechaCaja]);
+  (otorg[0]?.values||[]).forEach(r=>{
+    const[nom,pid,m,mon]=r; const sym=mon==='USD'?'U$S ':'$';
+    filas.push({tipo:'eg',label:nom,sub:`Otorgamiento crédito #${pid}`,monto:m,sym,mon});
+  });
+
+  // Transferencias salientes (egreso)
+  const trOut = DB.exec(`
+    SELECT descripcion, monto, moneda, destino FROM transferencias
+    WHERE origen=? AND fecha=?
+    ORDER BY id DESC`,[cta, fechaCaja]);
+  (trOut[0]?.values||[]).forEach(r=>{
+    const[desc,m,mon,dest]=r; const sym=mon==='USD'?'U$S ':'$';
+    filas.push({tipo:'eg',label:desc||'Transferencia',sub:`Hacia ${(dest||'—').replace(/_/g,' ')}`,monto:m,sym,mon});
+  });
+
+  if (!filas.length) {
+    lista.innerHTML='<div class="empty"><div class="empty-icon">📭</div>Sin movimientos este día</div>'; return;
+  }
+
+  const totIng = filas.filter(f=>f.tipo==='ing').reduce((a,f)=>a+Number(f.monto||0),0);
+  const totEg  = filas.filter(f=>f.tipo==='eg' ).reduce((a,f)=>a+Number(f.monto||0),0);
+
+  lista.innerHTML = `
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <div style="flex:1;background:var(--surface);border-radius:8px;padding:10px;text-align:center">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase">Ingresos</div>
+        <div style="font-weight:700;color:var(--ok);font-family:var(--mono)">$${Number(totIng).toLocaleString('es-AR')}</div>
+      </div>
+      <div style="flex:1;background:var(--surface);border-radius:8px;padding:10px;text-align:center">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase">Egresos</div>
+        <div style="font-weight:700;color:var(--danger);font-family:var(--mono)">$${Number(totEg).toLocaleString('es-AR')}</div>
+      </div>
+    </div>
+    ${filas.map(f=>`
+    <div style="padding:9px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:8px">
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${f.label}</div>
+        <div style="font-size:12px;color:var(--muted)">${f.sub}</div>
+      </div>
+      <div style="font-weight:700;color:${f.tipo==='ing'?'var(--ok)':'var(--danger)'};font-family:var(--mono);white-space:nowrap">
+        ${f.tipo==='ing'?'+':'-'}${f.sym}${Number(f.monto||0).toLocaleString('es-AR')}
+      </div>
+    </div>`).join('')}`;
 }
 
 // ══════════════════════════════════════════════════════
@@ -731,70 +872,144 @@ function verSimulador() {
   el.innerHTML=`
     <div class="back-btn" onclick="renderHerramientas()">‹ Volver</div>
     <div class="card">
-      <div class="card-title">🧮 Simulador francés</div>
-      <div class="sim-input-wrap">
-        <label class="sim-label">Monto del préstamo</label>
-        <input class="sim-input" id="simMonto" type="number" placeholder="100000" oninput="calcularFrances()">
-      </div>
-      <div class="sim-input-wrap">
-        <label class="sim-label">Tasa mensual %</label>
-        <input class="sim-input" id="simTasa" type="number" placeholder="15" oninput="calcularFrances()">
-      </div>
-      <div class="sim-input-wrap">
-        <label class="sim-label">Cantidad de cuotas</label>
-        <input class="sim-input" id="simCuotas" type="number" placeholder="12" oninput="calcularFrances()">
+      <div class="card-title">🧮 Simulador</div>
+      <div style="display:flex;gap:10px;margin-bottom:16px">
+        <div class="sim-input-wrap" style="flex:1;margin-bottom:0">
+          <label class="sim-label">Monto</label>
+          <input class="sim-input" id="simMonto" type="number" placeholder="100000" oninput="calcularSim()">
+        </div>
+        <div class="sim-input-wrap" style="flex:1;margin-bottom:0">
+          <label class="sim-label">Tasa mensual %</label>
+          <input class="sim-input" id="simTasa" type="number" placeholder="15" oninput="calcularSim()">
+        </div>
       </div>
       <div id="simResultado"></div>
     </div>`;
 }
 
-function calcularFrances() {
+function calcularSim() {
   const monto=parseFloat(document.getElementById('simMonto').value)||0;
   const tasa=parseFloat(document.getElementById('simTasa').value)||0;
-  const cuotas=parseInt(document.getElementById('simCuotas').value)||0;
   const res=document.getElementById('simResultado');
-  if(!monto||!tasa||!cuotas){ res.innerHTML=''; return; }
-
+  if(!monto||!tasa){ res.innerHTML=''; return; }
   const r=tasa/100;
-  const cuotaMensual=monto*(r*Math.pow(1+r,cuotas))/(Math.pow(1+r,cuotas)-1);
-  const totalPagar=cuotaMensual*cuotas;
-  const totalInteres=totalPagar-monto;
+  const r100 = n => Math.round(n/100)*100;
+  const filas=[3,4,5,6,7,8,9,10,11,12].map(n=>{
+    const cuota=monto*(r*Math.pow(1+r,n))/(Math.pow(1+r,n)-1);
+    const cuotaR=r100(cuota);
+    const total=cuotaR*n;
+    return `<tr>
+      <td style="color:var(--muted);font-family:var(--mono)">${n}</td>
+      <td style="font-weight:700;color:var(--accent);font-family:var(--mono)">${fmt(cuotaR)}</td>
+      <td style="font-family:var(--mono);color:var(--muted)">${fmt(total)}</td>
+    </tr>`;
+  }).join('');
+  res.innerHTML=`
+    <table class="sim-table">
+      <thead><tr>
+        <th style="text-align:left">Cuotas</th>
+        <th>Valor cuota</th>
+        <th>Total a pagar</th>
+      </tr></thead>
+      <tbody>${filas}</tbody>
+    </table>`;
+}
 
-  // Tabla de amortización
-  let saldo=monto, filas='', capTotal=0, intTotal=0;
-  for(let i=1;i<=cuotas;i++){
-    const interes=saldo*r;
-    const capital=cuotaMensual-interes;
-    saldo-=capital;
-    capTotal+=capital; intTotal+=interes;
-    if(i<=5||i===cuotas){
-      filas+=`<tr>
-        <td>${i}</td>
-        <td>${fmt(cuotaMensual)}</td>
-        <td>${fmt(capital)}</td>
-        <td>${fmt(interes)}</td>
-        <td>${fmt(Math.max(0,saldo))}</td>
-      </tr>`;
-    }
-    if(i===5&&cuotas>6){ filas+=`<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:6px">···</td></tr>`; }
+// ── COBROS DEL DÍA ────────────────────────────────────
+let fechaCobros = hoy();
+
+function verCobrosDelDia() {
+  fechaCobros = hoy();
+  const el = document.getElementById('clientesContent');
+  el.innerHTML = `
+    <div class="back-btn" onclick="renderClientes()">‹ Volver</div>
+    <div class="card">
+      <div class="card-title">📅 Cobros del día</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:14px">
+        <button onclick="cambiarDiaCobros(-1)" style="background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:7px 16px;font-size:18px;cursor:pointer">◀</button>
+        <span id="lblFechaCobros" style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--accent)"></span>
+        <button onclick="cambiarDiaCobros(1)" style="background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:7px 16px;font-size:18px;cursor:pointer">▶</button>
+        <button onclick="fechaCobros=hoy();cargarCobrosDelDia()" style="background:var(--accent);color:#000;border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer">HOY</button>
+      </div>
+      <div id="listaCobros"></div>
+    </div>`;
+  cargarCobrosDelDia();
+}
+
+function cambiarDiaCobros(delta) {
+  const d = new Date(fechaCobros + 'T12:00:00');
+  d.setDate(d.getDate() + delta);
+  fechaCobros = d.toISOString().slice(0, 10);
+  cargarCobrosDelDia();
+}
+
+function cargarCobrosDelDia() {
+  const lista = document.getElementById('listaCobros');
+  const lbl = document.getElementById('lblFechaCobros');
+  if (!lista || !lbl) return;
+  const partes = fechaCobros.split('-');
+  lbl.textContent = `${partes[2]}/${partes[1]}/${partes[0]}`;
+
+  const cuentaNom = c => ({'CAJA_CHICA':'Caja chica','CAJA_MAYOR':'Caja mayor'}[c] || (c||'—').replace(/_/g,' '));
+
+  // Cobros de cuotas
+  const cobros = DB.exec(`
+    SELECT cl.apellido||' '||cl.nombre, cu.numero_cuota, p.monto_pagado, p.cuenta_destino, pr.moneda, pr.id
+    FROM pagos p
+    JOIN cuotas cu ON p.cuota_id = cu.id
+    JOIN prestamos pr ON cu.prestamo_id = pr.id
+    JOIN clientes cl ON pr.cliente_id = cl.id
+    WHERE date(p.fecha_real_pago) = ?
+    ORDER BY p.id DESC`, [fechaCobros]);
+
+  // Otorgamientos
+  const otorg = DB.exec(`
+    SELECT cl.apellido||' '||cl.nombre, pr.id, pr.monto_prestado, pr.cuenta_origen, pr.moneda
+    FROM prestamos pr
+    JOIN clientes cl ON pr.cliente_id = cl.id
+    WHERE pr.fecha_inicio = ? AND pr.estado != 'EN_ESPERA'
+    ORDER BY pr.id DESC`, [fechaCobros]);
+
+  const filas = [];
+
+  if (cobros.length && cobros[0].values.length) {
+    cobros[0].values.forEach(r => {
+      const [nom, nc, monto, cta, moneda] = r;
+      const sym = moneda === 'USD' ? 'U$S ' : '$';
+      filas.push(`<div style="padding:10px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:8px">
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;font-size:14px">${nom}</div>
+          <div style="font-size:12px;color:var(--muted)">Cobro cuota ${nc} · ${cuentaNom(cta)}</div>
+        </div>
+        <div style="font-weight:700;color:var(--ok);font-family:var(--mono);white-space:nowrap">${sym}${Number(monto||0).toLocaleString('es-AR')}</div>
+      </div>`);
+    });
   }
 
-  res.innerHTML=`<div class="sim-result">
-    <div style="font-size:11px;color:var(--muted);text-align:center;text-transform:uppercase;letter-spacing:1px">Cuota mensual</div>
-    <div class="sim-cuota-big">${fmt(cuotaMensual)}</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
-      <div class="res-item"><div class="res-label">Total a pagar</div><div class="res-val danger">${fmt(totalPagar)}</div></div>
-      <div class="res-item"><div class="res-label">Total intereses</div><div class="res-val accent">${fmt(totalInteres)}</div></div>
-    </div>
-    <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Amortización</div>
-    <div style="overflow-x:auto">
-      <table class="sim-table">
-        <thead><tr><th>N°</th><th>Cuota</th><th>Capital</th><th>Interés</th><th>Saldo</th></tr></thead>
-        <tbody>${filas}</tbody>
-      </table>
-    </div>
-  </div>`;
+  if (otorg.length && otorg[0].values.length) {
+    otorg[0].values.forEach(r => {
+      const [nom, pid, monto, cta, moneda] = r;
+      const sym = moneda === 'USD' ? 'U$S ' : '$';
+      filas.push(`<div style="padding:10px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:8px">
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;font-size:14px">${nom}</div>
+          <div style="font-size:12px;color:var(--accent2)">Otorgamiento crédito #${pid} · ${cuentaNom(cta)}</div>
+        </div>
+        <div style="font-weight:700;color:var(--danger);font-family:var(--mono);white-space:nowrap">${sym}${Number(monto||0).toLocaleString('es-AR')}</div>
+      </div>`);
+    });
+  }
+
+  if (!filas.length) {
+    lista.innerHTML = '<div class="empty"><div class="empty-icon">📭</div>Sin movimientos este día</div>';
+  } else {
+    lista.innerHTML = `
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px">${filas.length} movimiento(s)</div>
+      ${filas.join('')}`;
+  }
 }
+
+// fin simulador
 </script>
 </body>
 </html>
