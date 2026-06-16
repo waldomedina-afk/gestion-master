@@ -36,7 +36,7 @@
   /* CARDS */
   .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;animation:fadeUp .25s ease both}
   @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-  .card-title{font-size:13px;font-weight:600;letter-spacing:1.5px;color:var(--accent);text-transform:uppercase;margin-bottom:12px}
+  .card-title{font-size:11px;font-weight:600;letter-spacing:1.5px;color:var(--accent);text-transform:uppercase;margin-bottom:12px}
 
   /* BUTTONS */
   .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;border-radius:8px;border:none;cursor:pointer;font-family:var(--sans);font-size:14px;font-weight:600;transition:all .15s}
@@ -61,8 +61,8 @@
   /* SALDOS */
   .saldo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   .saldo-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px}
-  .saldo-cuenta{font-size:12px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
-  .saldo-monto{font-size:20px;font-weight:700;font-family:var(--mono)}
+  .saldo-cuenta{font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
+  .saldo-monto{font-size:18px;font-weight:700;font-family:var(--mono)}
   .saldo-monto.pos{color:var(--ok)}.saldo-monto.neg{color:var(--danger)}
   .saldo-usd{font-size:13px;color:#81D4FA;font-family:var(--mono);margin-top:2px}
 
@@ -71,9 +71,9 @@
   .cuota-row:last-child{border-bottom:none}
   .cuota-num{font-family:var(--mono);font-size:11px;color:var(--muted);width:26px;flex-shrink:0;text-align:center}
   .cuota-info{flex:1;min-width:0}
-  .cuota-venc{font-size:12px;color:var(--muted)}
-  .cuota-monto-txt{font-size:15px;font-weight:600}
-  .badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:10px;flex-shrink:0}
+  .cuota-venc{font-size:11px;color:var(--muted)}
+  .cuota-monto-txt{font-size:14px;font-weight:600}
+  .badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;flex-shrink:0}
   .badge-ok{background:#0A2E1A;color:var(--ok)}
   .badge-pend{background:#0A1F3A;color:var(--accent)}
   .badge-venc{background:#2E0A0A;color:var(--danger)}
@@ -97,21 +97,21 @@
   /* RESUMEN */
   .res-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
   .res-item{background:var(--surface);border-radius:8px;padding:10px 12px}
-  .res-label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
-  .res-val{font-size:17px;font-weight:700;margin-top:3px;font-family:var(--mono)}
+  .res-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+  .res-val{font-size:16px;font-weight:700;margin-top:3px;font-family:var(--mono)}
   .res-val.ok{color:var(--ok)}.res-val.danger{color:var(--danger)}.res-val.accent{color:var(--accent2)}
 
   /* SIMULADOR */
   .sim-input-wrap{margin-bottom:10px}
-  .sim-label{font-size:13px;color:var(--muted);margin-bottom:4px;display:block;text-transform:uppercase;letter-spacing:.8px}
-  .sim-input{width:100%;padding:13px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:18px;font-family:var(--mono);outline:none;transition:border-color .2s}
+  .sim-label{font-size:11px;color:var(--muted);margin-bottom:4px;display:block;text-transform:uppercase;letter-spacing:.8px}
+  .sim-input{width:100%;padding:11px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:16px;font-family:var(--mono);outline:none;transition:border-color .2s}
   .sim-input:focus{border-color:var(--accent)}
   .sim-result{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;margin-top:12px}
-  .sim-cuota-big{font-size:30px;font-weight:700;color:var(--accent);font-family:var(--mono);text-align:center;margin:8px 0}
-  .sim-table{width:100%;border-collapse:collapse;font-size:15px;margin-top:10px}
-  .sim-table th{color:var(--muted);font-weight:600;padding:8px 6px;text-align:right;border-bottom:1px solid var(--border);font-size:12px;letter-spacing:.5px}
+  .sim-cuota-big{font-size:28px;font-weight:700;color:var(--accent);font-family:var(--mono);text-align:center;margin:8px 0}
+  .sim-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}
+  .sim-table th{color:var(--muted);font-weight:600;padding:6px 4px;text-align:right;border-bottom:1px solid var(--border);font-size:10px;letter-spacing:.5px}
   .sim-table th:first-child{text-align:left}
-  .sim-table td{padding:10px 6px;border-bottom:1px solid var(--border);text-align:right;font-family:var(--mono)}
+  .sim-table td{padding:7px 4px;border-bottom:1px solid var(--border);text-align:right;font-family:var(--mono)}
   .sim-table td:first-child{text-align:left;color:var(--muted)}
   .sim-table tr:last-child td{border-bottom:none}
 
@@ -427,13 +427,17 @@ function cargarCuotas(pid) {
   if(!cuotas.length||!cuotas[0].values.length){ wrap.innerHTML='<div class="empty">Sin cuotas</div>'; return; }
   const rows=cuotas[0].values;
   let tPag=0,tPend=0,venc=0;
-  rows.forEach(r=>{ const[,fv,m,est,,pag]=r; tPag+=pag||0; if(est!=='PAGADO'){ tPend+=Math.max(0,(m||0)-(pag||0)); if(fv&&fv<h) venc++; } });
+  rows.forEach(r=>{ const[,fv,m,est,pag]=r; tPag+=pag||0; if(est!=='PAGADO'){ tPend+=Math.max(0,(m||0)-(pag||0)); if(fv&&fv<h) venc++; } });
   const cc=DB.exec(`SELECT COALESCE(SUM(c.capital_puro)-SUM(COALESCE((SELECT SUM(p.capital_cubierto) FROM pagos p WHERE p.cuota_id=c.id),0)),0) FROM cuotas c WHERE c.prestamo_id=? AND c.estado!='PAGADO'`,[pid]);
   const enCalle=cc[0]?.values[0][0]||0;
-  const prox=DB.exec(`SELECT fecha_vencimiento,monto_cuota,numero_cuota FROM cuotas WHERE prestamo_id=? AND estado='PENDIENTE' ORDER BY numero_cuota LIMIT 1`,[pid]);
+  const prox=DB.exec(`
+    SELECT c.fecha_vencimiento, c.monto_cuota, c.numero_cuota,
+           COALESCE((SELECT SUM(p.monto_pagado) FROM pagos p WHERE p.cuota_id=c.id),0) pagado
+    FROM cuotas c WHERE c.prestamo_id=? AND c.estado IN ('PENDIENTE','PARCIAL')
+    ORDER BY c.numero_cuota LIMIT 1`,[pid]);
   let proxHTML='';
   if(prox.length&&prox[0].values.length){
-    const[fv,mc,nc]=prox[0].values[0];
+    const[fv,mc,nc,pagProx]=prox[0].values[0];
     const dias=Math.ceil((new Date(fv)-new Date(h))/86400000);
     const col=dias<0?'danger':dias<=3?'accent':'ok';
     const lbl=dias<0?`${Math.abs(dias)}d vencida`:dias===0?'HOY':`en ${dias}d`;
@@ -453,7 +457,7 @@ function cargarCuotas(pid) {
     </div>
     <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Detalle</div>
     ${rows.map(r=>{
-      const[num,fv,m,est,,pag]=r;
+      const[num,fv,m,est,pag]=r;
       const est2=est==='PAGADO'?'PAGADO':(fv&&fv<h)?'VENCIDA':pag>0?'PARCIAL':'PENDIENTE';
       const bc={'PAGADO':'badge-ok','VENCIDA':'badge-venc','PARCIAL':'badge-parc','PENDIENTE':'badge-pend'}[est2];
       const saldo=Math.max(0,(m||0)-(pag||0));
@@ -670,16 +674,18 @@ function verSimulador() {
   el.innerHTML=`
     <div class="back-btn" onclick="renderHerramientas()">‹ Volver</div>
     <div class="card">
-      <div class="card-title">🧮 Simulador</div>
-      <div style="display:flex;gap:10px;margin-bottom:16px">
-        <div class="sim-input-wrap" style="flex:1;margin-bottom:0">
-          <label class="sim-label">Monto</label>
-          <input class="sim-input" id="simMonto" type="number" placeholder="100000" oninput="calcularSim()">
-        </div>
-        <div class="sim-input-wrap" style="flex:1;margin-bottom:0">
-          <label class="sim-label">Tasa mensual %</label>
-          <input class="sim-input" id="simTasa" type="number" placeholder="15" oninput="calcularSim()">
-        </div>
+      <div class="card-title">🧮 Simulador francés</div>
+      <div class="sim-input-wrap">
+        <label class="sim-label">Monto del préstamo</label>
+        <input class="sim-input" id="simMonto" type="number" placeholder="100000" oninput="calcularFrances()">
+      </div>
+      <div class="sim-input-wrap">
+        <label class="sim-label">Tasa mensual %</label>
+        <input class="sim-input" id="simTasa" type="number" placeholder="15" oninput="calcularFrances()">
+      </div>
+      <div class="sim-input-wrap">
+        <label class="sim-label">Cantidad de cuotas</label>
+        <input class="sim-input" id="simCuotas" type="number" placeholder="12" oninput="calcularFrances()">
       </div>
       <div id="simResultado"></div>
     </div>`;
@@ -777,32 +783,52 @@ function cargarCobrosDelDia() {
   }
 }
 
-function calcularSim() {
+function calcularFrances() {
   const monto=parseFloat(document.getElementById('simMonto').value)||0;
   const tasa=parseFloat(document.getElementById('simTasa').value)||0;
+  const cuotas=parseInt(document.getElementById('simCuotas').value)||0;
   const res=document.getElementById('simResultado');
-  if(!monto||!tasa){ res.innerHTML=''; return; }
+  if(!monto||!tasa||!cuotas){ res.innerHTML=''; return; }
+
   const r=tasa/100;
-  const r100 = n => Math.round(n/100)*100;
-  const filas=[3,4,5,6,7,8,9,10,11,12].map(n=>{
-    const cuota=monto*(r*Math.pow(1+r,n))/(Math.pow(1+r,n)-1);
-    const cuotaR=r100(cuota);
-    const total=cuotaR*n;
-    return `<tr>
-      <td style="color:var(--muted);font-family:var(--mono)">${n}</td>
-      <td style="font-weight:700;color:var(--accent);font-family:var(--mono)">${fmt(cuotaR)}</td>
-      <td style="font-family:var(--mono);color:var(--muted)">${fmt(total)}</td>
-    </tr>`;
-  }).join('');
-  res.innerHTML=`
-    <table class="sim-table">
-      <thead><tr>
-        <th style="text-align:left">Cuotas</th>
-        <th>Valor cuota</th>
-        <th>Total a pagar</th>
-      </tr></thead>
-      <tbody>${filas}</tbody>
-    </table>`;
+  const cuotaMensual=monto*(r*Math.pow(1+r,cuotas))/(Math.pow(1+r,cuotas)-1);
+  const totalPagar=cuotaMensual*cuotas;
+  const totalInteres=totalPagar-monto;
+
+  // Tabla de amortización
+  let saldo=monto, filas='', capTotal=0, intTotal=0;
+  for(let i=1;i<=cuotas;i++){
+    const interes=saldo*r;
+    const capital=cuotaMensual-interes;
+    saldo-=capital;
+    capTotal+=capital; intTotal+=interes;
+    if(i<=5||i===cuotas){
+      filas+=`<tr>
+        <td>${i}</td>
+        <td>${fmt(cuotaMensual)}</td>
+        <td>${fmt(capital)}</td>
+        <td>${fmt(interes)}</td>
+        <td>${fmt(Math.max(0,saldo))}</td>
+      </tr>`;
+    }
+    if(i===5&&cuotas>6){ filas+=`<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:6px">···</td></tr>`; }
+  }
+
+  res.innerHTML=`<div class="sim-result">
+    <div style="font-size:11px;color:var(--muted);text-align:center;text-transform:uppercase;letter-spacing:1px">Cuota mensual</div>
+    <div class="sim-cuota-big">${fmt(cuotaMensual)}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      <div class="res-item"><div class="res-label">Total a pagar</div><div class="res-val danger">${fmt(totalPagar)}</div></div>
+      <div class="res-item"><div class="res-label">Total intereses</div><div class="res-val accent">${fmt(totalInteres)}</div></div>
+    </div>
+    <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Amortización</div>
+    <div style="overflow-x:auto">
+      <table class="sim-table">
+        <thead><tr><th>N°</th><th>Cuota</th><th>Capital</th><th>Interés</th><th>Saldo</th></tr></thead>
+        <tbody>${filas}</tbody>
+      </table>
+    </div>
+  </div>`;
 }
 </script>
 </body>
