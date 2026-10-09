@@ -569,7 +569,7 @@ function verEspera() {
     SELECT pr.id, cl.apellido||' '||cl.nombre nombre, cl.telefono,
            pr.monto_prestado, pr.moneda, pr.cantidad_cuotas,
            pr.tipo_sistema, pr.frecuencia, pr.fecha_inicio, pr.observaciones,
-           pr.monto_entregado
+           pr.monto_entregado, pr.alias_cbu
     FROM prestamos pr JOIN clientes cl ON pr.cliente_id=cl.id
     WHERE pr.estado='EN_ESPERA' ORDER BY pr.id DESC`);
 
@@ -580,7 +580,7 @@ function verEspera() {
   } else {
     cardCred.innerHTML+=`<div style="font-size:12px;color:var(--muted);margin-bottom:8px">${creditos[0].values.length} crédito(s)</div>`;
     creditos[0].values.forEach(r=>{
-      const[id,nom,tel,monto,moneda,cuotas,sistema,freq,fecha,obs,entregado]=r;
+      const[id,nom,tel,monto,moneda,cuotas,sistema,freq,fecha,obs,entregado,alias]=r;
       const sym=moneda==='USD'?'U$S ':'$';
       const cub=entregado||0;
       const faltante=Math.max(0,(monto||0)-cub);
@@ -592,6 +592,7 @@ function verEspera() {
             <div style="font-weight:600;font-size:15px;margin-top:2px">${nom}</div>
             <div style="font-size:12px;color:var(--muted);margin-top:2px">${cuotas} cuotas · ${sistema||''} · ${freq||''}</div>
             ${tel?`<div style="font-size:12px;color:var(--accent)">📞 ${tel}</div>`:''}
+            ${alias?`<div style="font-size:12px;color:var(--accent2);font-family:var(--mono)">🏦 ${alias}</div>`:''}
             ${obs?`<div style="font-size:12px;color:var(--muted);margin-top:2px">${obs}</div>`:''}
           </div>
           <div style="text-align:right;flex-shrink:0;margin-left:10px">
@@ -611,9 +612,9 @@ function verEspera() {
   // ── GASTOS / PAGOS EN ESPERA ────────────────────────
   const items=DB.exec(`
     SELECT id,tipo,descripcion,monto_total,monto_cubierto,moneda_pago,
-           fecha_creacion,estado,observaciones
+           fecha_creacion,estado,observaciones,alias_cbu
     FROM items_espera
-    WHERE UPPER(COALESCE(estado,'PENDIENTE'))!='COMPLETADO'
+    WHERE UPPER(COALESCE(estado,'PENDIENTE')) NOT IN ('COMPLETADO','CANCELADO')
     ORDER BY fecha_creacion ASC`);
 
   const cardItems=document.createElement('div'); cardItems.className='card';
@@ -623,7 +624,7 @@ function verEspera() {
   } else {
     cardItems.innerHTML+=`<div style="font-size:12px;color:var(--muted);margin-bottom:8px">${items[0].values.length} ítem(s)</div>`;
     items[0].values.forEach(r=>{
-      const[id,tipo,desc,total,cub,moneda,fecha,estado,obs]=r;
+      const[id,tipo,desc,total,cub,moneda,fecha,estado,obs,alias]=r;
       const pct=total>0?Math.min(100,((cub||0)/total)*100):0;
       const sym=moneda==='USD'?'U$S ':'$';
       const faltante=Math.max(0,(total||0)-(cub||0));
@@ -632,6 +633,7 @@ function verEspera() {
           <div>
             <div style="font-size:11px;color:var(--muted);font-family:var(--mono)">#${id} · ${fecha?fecha.slice(0,10):'—'} · ${tipo||'—'}</div>
             <div style="font-weight:600;font-size:14px;margin-top:2px">${desc||'—'}</div>
+            ${alias?`<div style="font-size:12px;color:var(--accent2);font-family:var(--mono)">🏦 ${alias}</div>`:''}
             ${obs?`<div style="font-size:12px;color:var(--muted);margin-top:2px">${obs}</div>`:''}
           </div>
           <div style="text-align:right;flex-shrink:0;margin-left:10px">
