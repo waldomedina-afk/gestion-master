@@ -767,11 +767,11 @@ function verEspera() {
     SELECT pr.id, cl.apellido||' '||cl.nombre nombre, cl.telefono,
            pr.monto_prestado, pr.moneda, pr.cantidad_cuotas,
            pr.tipo_sistema, pr.frecuencia, pr.fecha_inicio, pr.observaciones,
-           pr.monto_entregado, pr.fecha_limite
+           pr.monto_entregado, pr.fecha_limite, pr.alias_cbu
     FROM prestamos pr JOIN clientes cl ON pr.cliente_id=cl.id
     WHERE pr.estado='EN_ESPERA'`);
   if(creditos.length) creditos[0].values.forEach(r=>{
-    const[id,nom,tel,monto,moneda,cuotas,sistema,freq,fecha,obs,entregado,flim]=r;
+    const[id,nom,tel,monto,moneda,cuotas,sistema,freq,fecha,obs,entregado,flim,alias]=r;
     const sym=moneda==='USD'?'U$S ':'$';
     const cub=entregado||0;
     const faltante=Math.max(0,(monto||0)-cub);
@@ -784,6 +784,7 @@ function verEspera() {
             <div style="font-size:12px;color:var(--muted);margin-top:2px">${cuotas} cuotas · ${sistema||''} · ${freq||''}</div>
             ${tel?`<div style="font-size:12px;color:var(--accent)">📞 ${tel}</div>`:''}
             ${obs?`<div style="font-size:12px;color:var(--muted);margin-top:2px">${esc(obs)}</div>`:''}
+            ${alias?`<div style="font-size:12px;color:var(--accent);margin-top:3px;word-break:break-all" onclick="navigator.clipboard&&navigator.clipboard.writeText('${esc(alias).replace(/'/g,'')}')">🏦 ${esc(alias)}${''}</div>`:''}
           </div>
           <div style="text-align:right;flex-shrink:0;margin-left:10px">
             <div style="font-weight:700;font-size:16px;color:var(--accent2)">${sym}${Number(monto||0).toLocaleString('es-AR')}</div>
@@ -802,15 +803,15 @@ function verEspera() {
   try{
     items=DB.exec(`
       SELECT id,tipo,descripcion,monto_total,monto_cubierto,moneda_pago,
-             fecha_creacion,estado,observaciones,fecha_limite
+             fecha_creacion,estado,observaciones,fecha_limite,alias_cbu,alias_titular
       FROM items_espera
       WHERE estado='PENDIENTE'`);
   }catch(e){
-    items=DB.exec(`SELECT id,tipo,descripcion,monto_total,monto_cubierto,moneda_pago,fecha_creacion,estado,observaciones,NULL FROM items_espera WHERE estado='PENDIENTE'`);
+    items=DB.exec(`SELECT id,tipo,descripcion,monto_total,monto_cubierto,moneda_pago,fecha_creacion,estado,observaciones,NULL,alias_cbu,NULL FROM items_espera WHERE estado='PENDIENTE'`);
   }
   const tipoMapa={GASTO:'GASTO',COMPRA_USD:'COMPRA USD',PAGO_INVERSOR:'PAGO INVERSOR',INVERSION_PROPIA:'INV. PROPIA',APORTE_INV_PROPIA:'APORTE INV. PROPIA'};
   if(items.length) items[0].values.forEach(r=>{
-    const[id,tipo,desc,total,cub,moneda,fecha,estado,obs,flim]=r;
+    const[id,tipo,desc,total,cub,moneda,fecha,estado,obs,flim,alias,titular]=r;
     const pct=total>0?Math.min(100,((cub||0)/total)*100):0;
     const sym=moneda==='USD'?'U$S ':'$';
     const faltante=Math.max(0,(total||0)-(cub||0));
@@ -840,6 +841,7 @@ function verEspera() {
             <div style="font-size:11px;color:var(--muted);font-family:var(--mono)">#${id} · ${fecha?fecha.slice(0,10):'—'} · ${tipoMapa[tipo]||tipo||'—'}${flim?' · límite '+String(flim).slice(0,10):''}</div>
             <div style="font-weight:600;font-size:14px;margin-top:2px">${esc(desc)||'—'}</div>
             ${obs?`<div style="font-size:12px;color:var(--muted);margin-top:2px">${esc(obs)}</div>`:''}
+            ${alias?`<div style="font-size:12px;color:var(--accent);margin-top:3px;word-break:break-all" onclick="navigator.clipboard&&navigator.clipboard.writeText('${esc(alias).replace(/'/g,'')}')">🏦 ${esc(alias)}${titular?' · '+esc(titular):''}</div>`:''}
           </div>
           <div style="text-align:right;flex-shrink:0;margin-left:10px">
             <div style="font-weight:700;color:var(--accent2)">${sym}${Number(total||0).toLocaleString('es-AR')}</div>
