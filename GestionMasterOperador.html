@@ -78,6 +78,7 @@
   .badge-pend{background:#0A1F3A;color:var(--accent)}
   .badge-venc{background:#2E0A0A;color:var(--danger)}
   .badge-parc{background:#2E1E0A;color:var(--accent2)}
+  .badge-hoy{background:#2E2400;color:#FFD54F}
   .badge-grey{background:#1a1a2e;color:var(--muted)}
 
   /* CREDITO EXPAND */
@@ -171,6 +172,20 @@
         <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
       </div>
     </div>
+
+    <!-- AGREGADO 2026-11-04, a pedido de Waldo: consulta BCRA por DNI antes del login (sin necesidad de Drive) -->
+    <div class="card">
+      <div class="card-title">🏛 Consultar BCRA por DNI</div>
+      <div style="display:flex;gap:8px">
+        <input id="bcraDni" type="tel" inputmode="numeric" maxlength="11" placeholder="DNI (solo números)"
+          style="flex:1;min-width:0;padding:12px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:15px">
+        <select id="bcraSexo" style="padding:12px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:14px">
+          <option value="">Sexo: ?</option><option value="M">M</option><option value="F">F</option>
+        </select>
+      </div>
+      <button class="btn btn-secondary" id="bcraBtn" style="margin-top:8px" onclick="consultarBCRA()">🔎 Consultar Central de Deudores</button>
+      <div id="bcraRes" style="margin-top:10px;font-size:13px"></div>
+    </div>
   </div>
 
   <!-- CLIENTES -->
@@ -223,7 +238,11 @@ function setProgress(msg,pct) {
   document.getElementById('progressFill').style.width=pct+'%';
 }
 function fmt(n,sym='$'){ return sym+Number(n||0).toLocaleString('es-AR',{maximumFractionDigits:0}); }
-function hoy(){ return new Date().toISOString().slice(0,10); }
+// BUGFIX 2026-11-05: antes usaba toISOString() (hora UTC). En Argentina (UTC-3),
+// desde las 21:00 "hoy" ya era el día siguiente: la mora se calculaba con un día
+// de más y las cuotas que vencen mañana figuraban como vencidas. Ahora usa la
+// fecha local del teléfono.
+function hoy(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 
 // ── NAV ────────────────────────────────────────────────
 function showSection(sec) {
@@ -244,17 +263,100 @@ function activarApp() {
   showSection('clientes');
 }
 
+// ── CONSULTA BCRA POR DNI (AGREGADO 2026-11-04, a pedido de Waldo) ─────
+// Misma lógica que el sistema de escritorio: se calculan los CUILs
+// posibles desde el DNI (Módulo 11) y se prueban uno por uno contra la
+// Central de Deudores del BCRA (API pública, sin clave). La consulta sale
+// directo del navegador de quien usa la página: no pasa por ningún
+// servidor propio y no usa ni expone ninguna clave.
+function bcraCuils(dni, sexo) {
+  const pref = sexo==='M'?['20','23','24'] : sexo==='F'?['27','23'] : ['20','27','23','24'];
+  const pesos=[5,4,3,2,7,6,5,4,3,2], out=[];
+  for(const p of pref){
+    const base=p+String(dni).padStart(8,'0');
+    let suma=0; for(let i=0;i<10;i++) suma+=Number(base[i])*pesos[i];
+    const resto=suma%11; let ver;
+    if(resto===0) ver=0; else if(resto===1) ver=(p==='27')?9:null; else ver=11-resto;
+    if(ver!==null) out.push(base+ver);
+  }
+  return out;
+}
+function escH(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+async function consultarBCRA() {
+  const dni=document.getElementById('bcraDni').value.replace(/\D/g,'');
+  const sexo=document.getElementById('bcraSexo').value;
+  const out=document.getElementById('bcraRes'), btn=document.getElementById('bcraBtn');
+  if(dni.length<7||dni.length>8){ out.innerHTML='<span style="color:#EF5350">Ingresá un DNI de 7 u 8 dígitos.</span>'; return; }
+  const BASE='https://api.bcra.gob.ar/centraldedeudores/v1.0';
+  btn.disabled=true; out.innerHTML='<span style="color:var(--muted)">Consultando BCRA...</span>';
+  try {
+    let data=null, cuil=null, limite=false;
+    const cuils=bcraCuils(dni,sexo);
+    for(let i=0;i<cuils.length;i++){
+      if(i>0) await new Promise(r=>setTimeout(r,600));
+      out.innerHTML='<span style="color:var(--muted)">Consultando CUIL '+escH(cuils[i])+'...</span>';
+      const r=await fetch(BASE+'/Deudas/'+cuils[i]);
+      if(r.status===200){ data=await r.json(); cuil=cuils[i]; break; }
+      if(r.status===404) continue;
+      if(r.status===429){ limite=true; break; }
+    }
+    if(limite){ out.innerHTML='<span style="color:#FFA726">El BCRA alcanzó el límite de consultas por ahora (error 429). Probá de nuevo en unos minutos.</span>'; return; }
+    if(!data){ out.innerHTML='<div style="color:#4CAF50;font-weight:700">✅ DNI '+escH(dni)+' no figura en la Central de Deudores.</div><div style="color:var(--muted);margin-top:4px">No registra deudas en el sistema financiero formal.</div>'; return; }
+    let cheques=[];
+    try{ const rc=await fetch(BASE+'/ChequesRechazados/'+cuil); if(rc.status===200){ const j=await rc.json(); cheques=(j.results&&j.results.entidades)||[]; } }catch(e){}
+    const res=data.results||{}, periodos=res.periodos||[];
+    let sitMax=1; periodos.forEach(p=>(p.entidades||[]).forEach(e=>{ if(Number.isInteger(e.situacion)&&e.situacion>sitMax) sitMax=e.situacion; }));
+    const desc={1:'Normal',2:'Con seguimiento especial',3:'Con problemas',4:'Con alto riesgo de insolvencia',5:'Irrecuperable'}[sitMax]||'?';
+    const col={1:'#4CAF50',2:'#FFA726',3:'#FF7043',4:'#EF5350',5:'#B71C1C'}[sitMax]||'#607D8B';
+    let h='<div style="font-weight:700;font-size:15px">'+escH(res.denominacion||'')+'</div>'
+        +'<div style="color:var(--muted);font-size:12px">CUIL '+escH(cuil.slice(0,2)+'-'+cuil.slice(2,10)+'-'+cuil.slice(10))+' · DNI '+escH(dni)+'</div>';
+    if(!periodos.length){
+      h+='<div style="color:#4CAF50;margin-top:8px;font-weight:700">✅ Sin deudas registradas</div>';
+    } else {
+      h+='<div style="margin-top:8px;font-weight:700;color:'+col+'">Situación máxima: '+sitMax+' — '+escH(desc)+'</div>';
+      periodos.slice(0,3).forEach(p=>{
+        h+='<div style="margin-top:8px;color:var(--muted);font-size:12px">Período '+escH(p.periodo||'?')+'</div>';
+        (p.entidades||[]).forEach(e=>{
+          h+='<div style="padding:4px 0;border-bottom:1px solid var(--border)">'+escH(e.entidad||'?')
+            +' · Sit. '+escH(e.situacion)+' · $'+Number((e.monto||0)*1000).toLocaleString('es-AR')+'</div>';
+        });
+      });
+      h+='<div style="margin-top:4px;color:var(--muted);font-size:11px">Montos en pesos (el BCRA los informa en miles).</div>';
+    }
+    h+= cheques.length ? '<div style="margin-top:8px;color:#EF5350;font-weight:700">⚠️ Cheques rechazados: '+cheques.length+'</div>'
+                       : '<div style="margin-top:8px;color:#4CAF50">Sin cheques rechazados</div>';
+    out.innerHTML=h;
+  } catch(e){
+    out.innerHTML='<span style="color:#EF5350">No se pudo conectar con el BCRA desde el navegador ('+escH(e.message||e)+'). Puede ser tu conexión o que el BCRA no permita la consulta desde esta página.</span>';
+  } finally { btn.disabled=false; }
+}
+
 // ── GOOGLE AUTH ────────────────────────────────────────
 function iniciarGoogle() {
-  const client = google.accounts.oauth2.initTokenClient({
+  // AGREGADO 2026-11-04, a pedido de Waldo: recordar con qué cuenta se
+  // conectó la última vez y pasársela a Google como sugerencia (hint),
+  // para que no muestre el selector de cuentas cada vez que se abre la
+  // página teniendo varias sesiones de Google en el navegador.
+  let hint='';
+  try { hint=localStorage.getItem('gm_google_hint')||''; } catch(e){}
+  const cfg={
     client_id: CLIENT_ID, scope: SCOPES,
     callback: async(resp)=>{
       if(resp.error){ toast('❌ Error de autenticación'); return; }
       accessToken=resp.access_token;
+      // Guardar el mail de la cuenta (no bloquea ni afecta el flujo si falla)
+      fetch('https://www.googleapis.com/drive/v3/about?fields=user(emailAddress)',
+        {headers:{Authorization:'Bearer '+accessToken}})
+        .then(r=>r.json()).then(d=>{
+          const em=d&&d.user&&d.user.emailAddress;
+          if(em){ try{ localStorage.setItem('gm_google_hint',em); }catch(e){} }
+        }).catch(()=>{});
       setProgress('Buscando base de datos...', 20);
       await buscarDBenDrive();
     }
-  });
+  };
+  if(hint) cfg.hint=hint;
+  const client = google.accounts.oauth2.initTokenClient(cfg);
   client.requestAccessToken();
 }
 
@@ -332,7 +434,8 @@ function renderClientes() {
     <div class="card">
       <div class="card-title">⚡ Accesos rápidos</div>
       <button class="btn btn-secondary" onclick="verCobrosDelDia()">📅 Cobros del día</button>
-      <button class="btn btn-secondary" onclick="verVencidas()">⚠️ Cuotas vencidas hoy</button>
+      <button class="btn btn-secondary" onclick="verVencenHoy()">📆 Vencen hoy</button>
+      <button class="btn btn-secondary" onclick="verVencidas()">⚠️ Cuotas vencidas</button>
       <button class="btn btn-secondary" onclick="refrescarDrive()">🔄 Actualizar desde Drive</button>
     </div>`;
   setTimeout(()=>document.getElementById('searchInput')?.focus(),100);
@@ -416,31 +519,79 @@ function cargarCuotas(pid) {
   const pr=DB.exec(`SELECT moneda FROM prestamos WHERE id=?`,[pid]);
   const moneda=pr[0].values[0][0]; const sym=moneda==='USD'?'U$S ':'$';
 
-  // Tasa mora diaria (desde configuracion, default 1%)
-  const tasaRow=DB.exec(`SELECT valor FROM configuracion WHERE clave='tasa_mora_diaria'`);
-  const MORA_DIARIA=(tasaRow.length&&tasaRow[0].values.length)?parseFloat(tasaRow[0].values[0][0])||1:1;
+  // BUGFIX 2026-11-05: mora copiada del sistema de escritorio (abrir_ventana_cobro):
+  // tasa por defecto = configuracion 'tasa_mora_diaria_default'; tasa propia del
+  // credito (tasa_mora_custom); pausa (mora_pausada: sin fecha = ELIMINAR, con
+  // fecha = CONGELAR); y reconstruccion tramo por tramo entre pagos, arrastrando
+  // el deficit de mora no cobrada.
+  let MORA_DIARIA=1, moraPausada=false, moraCongel=null;
+  try{
+    const tr=DB.exec(`SELECT valor FROM configuracion WHERE clave='tasa_mora_diaria_default'`);
+    if(tr.length&&tr[0].values.length&&tr[0].values[0][0]!==null&&tr[0].values[0][0]!==''){const v=parseFloat(tr[0].values[0][0]); if(!isNaN(v)) MORA_DIARIA=v;}
+  }catch(e){}
+  try{
+    const pm=DB.exec(`SELECT tasa_mora_custom, mora_pausada, mora_congelada_fecha FROM prestamos WHERE id=?`,[pid]);
+    if(pm.length&&pm[0].values.length){
+      const[tc,mp,mf]=pm[0].values[0];
+      if(tc!==null&&tc!==undefined&&tc!==''&&!isNaN(parseFloat(tc))) MORA_DIARIA=parseFloat(tc);
+      moraPausada=!!mp; moraCongel=mf?String(mf).slice(0,10):null;
+    }
+  }catch(e){}
+  const pagosPorCuota={};
+  try{
+    const pg=DB.exec(`SELECT p.cuota_id,p.fecha_real_pago,p.monto_pagado,p.mora_cobrada FROM pagos p JOIN cuotas c ON c.id=p.cuota_id WHERE c.prestamo_id=? ORDER BY p.fecha_real_pago ASC, p.id ASC`,[pid]);
+    if(pg.length) pg[0].values.forEach(x=>{(pagosPorCuota[x[0]]=pagosPorCuota[x[0]]||[]).push(x);});
+  }catch(e){}
+  const dDias=(a,b)=>{const pa=a.split('-'),pb=b.split('-');return Math.round((Date.UTC(+pb[0],+pb[1]-1,+pb[2])-Date.UTC(+pa[0],+pa[1]-1,+pa[2]))/86400000);};
+  const calcMora=(cid,fv,monto)=>{
+    if(!fv) return 0;
+    let tope;
+    if(moraPausada&&!moraCongel) return 0;
+    else if(moraPausada&&moraCongel) tope=moraCongel; else tope=h;
+    let cursor=fv.slice(0,10), saldoC=+monto||0, acum=0;
+    (pagosPorCuota[cid]||[]).forEach(x=>{
+      const fp=x[1]?String(x[1]).slice(0,10):null; if(!fp) return;
+      const dt=dDias(cursor,fp);
+      if(dt>0) acum+=saldoC*(MORA_DIARIA/100)*dt;
+      acum-=(x[3]||0);
+      saldoC-=((x[2]||0)-(x[3]||0));
+      if(fp>cursor) cursor=fp;
+    });
+    const df=dDias(cursor,tope);
+    if(df>0) acum+=saldoC*(MORA_DIARIA/100)*df;
+    acum=Math.max(0,acum);
+    return moneda==='USD'?Math.round(acum):Math.round(acum/100)*100;
+  };
 
   const cuotas=DB.exec(`
     SELECT c.numero_cuota,c.fecha_vencimiento,c.monto_cuota,c.estado,
            COALESCE((SELECT SUM(p.monto_pagado - p.mora_cobrada) FROM pagos p WHERE p.cuota_id=c.id),0) cobrado,
-           (SELECT MAX(p.fecha_real_pago) FROM pagos p WHERE p.cuota_id=c.id) ultimo_pago
+           (SELECT MAX(p.fecha_real_pago) FROM pagos p WHERE p.cuota_id=c.id) ultimo_pago, c.id cid
     FROM cuotas c WHERE c.prestamo_id=? ORDER BY c.numero_cuota`,[pid]);
   if(!cuotas.length||!cuotas[0].values.length){ wrap.innerHTML='<div class="empty">Sin cuotas</div>'; return; }
   const rows=cuotas[0].values;
-  let tPag=0,tPend=0,venc=0;
+  let tPag=0,tPend=0,venc=0,venceHoy=0;
   rows.forEach(r=>{
-    const[,fv,m,est,cob,up]=r;
+    const[,fv,m,est,cob,up,cid]=r;
     tPag+=cob||0;
-    if(est!=='PAGADO'&&est!=='FINALIZADO'){
+    // BUGFIX 2026-11-05: las cuotas CANCELADO (ej. de un crédito refinanciado) se
+    // contaban como pendientes y inflaban el saldo del cliente. El sistema de
+    // escritorio también las excluye.
+    if(est!=='PAGADO'&&est!=='FINALIZADO'&&est!=='CANCELADO'){
       const saldo=Math.max(0,(m||0)-(cob||0));
-      const fechaBase=(up&&up.slice(0,10)>fv)?up.slice(0,10):fv;
-      const dias=Math.ceil((new Date(h)-new Date(fechaBase))/86400000);
-      const mora=dias>0?Math.round(saldo*(MORA_DIARIA/100)*dias):0;
+      const mora=calcMora(cid,fv,m);
       tPend+=saldo+mora;
+      // AJUSTADO 2026-10-29, a pedido de Waldo ("no tengo forma de ver
+      // los que vencen en el dia actual.. solo me muestra los
+      // vencidos"): antes solo se contaba fv<h (estrictamente antes de
+      // hoy) — una cuota que vence HOY no entraba en ningún contador ni
+      // badge, quedaba mezclada como "PENDIENTE" entre las futuras. Se
+      // separa en su propio contador.
       if(fv&&fv<h) venc++;
+      else if(fv===h && saldo>0) venceHoy++; // solo si todavía tiene saldo (no contar las ya cubiertas)
     }
   });
-  const cc=DB.exec(`SELECT COALESCE(SUM(c.capital_puro)-SUM(COALESCE((SELECT SUM(p.capital_cubierto) FROM pagos p WHERE p.cuota_id=c.id),0)),0) FROM cuotas c WHERE c.prestamo_id=? AND c.estado!='PAGADO'`,[pid]);
+  const cc=DB.exec(`SELECT COALESCE(SUM(c.capital_puro)-SUM(COALESCE((SELECT SUM(p.capital_cubierto) FROM pagos p WHERE p.cuota_id=c.id),0)),0) FROM cuotas c WHERE c.prestamo_id=? AND c.estado NOT IN ('PAGADO','FINALIZADO','CANCELADO')`,[pid]);
   const enCalle=cc[0]?.values[0][0]||0;
   const prox=DB.exec(`SELECT fecha_vencimiento,monto_cuota,numero_cuota FROM cuotas WHERE prestamo_id=? AND estado='PENDIENTE' ORDER BY numero_cuota LIMIT 1`,[pid]);
   let proxHTML='';
@@ -461,18 +612,22 @@ function cargarCuotas(pid) {
       <div class="res-item"><div class="res-label">Pendiente</div><div class="res-val ${venc>0?'danger':'accent'}">${sym}${Number(tPend).toLocaleString('es-AR')}</div></div>
       <div class="res-item"><div class="res-label">Capital en calle</div><div class="res-val accent">${sym}${Number(enCalle).toLocaleString('es-AR')}</div></div>
       <div class="res-item"><div class="res-label">Cuotas vencidas</div><div class="res-val ${venc>0?'danger':'ok'}">${venc}</div></div>
+      <div class="res-item"><div class="res-label">Vencen hoy</div><div class="res-val" style="color:${venceHoy>0?'#FFD54F':'var(--ok)'}">${venceHoy}</div></div>
       ${proxHTML}
     </div>
     <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Detalle</div>
     ${rows.map(r=>{
-      const[num,fv,m,est,cobrado,ultimoPago]=r;
+      const[num,fv,m,est,cobrado,ultimoPago,cid]=r;
       const saldo=Math.max(0,(m||0)-(cobrado||0));
-      const fechaBase=(ultimoPago&&ultimoPago.slice(0,10)>fv)?ultimoPago.slice(0,10):fv;
-      const diasAtraso=Math.ceil((new Date(h)-new Date(fechaBase))/86400000);
-      const moraCalc=(diasAtraso>0&&est!=='PAGADO'&&est!=='FINALIZADO')?Math.round(saldo*(MORA_DIARIA/100)*diasAtraso):0;
+      const fechaBase=fv;
+      const diasAtraso=fv?dDias(fv,h):0;
+      const moraCalc=(est!=='PAGADO'&&est!=='FINALIZADO'&&est!=='CANCELADO')?calcMora(cid,fv,m):0;
       const totCRec=saldo+moraCalc;
-      const est2=est==='PAGADO'?'PAGADO':est==='FINALIZADO'?'PAGADO':(fv&&fv<h)?'VENCIDA':cobrado>0?'PARCIAL':'PENDIENTE';
-      const bc={'PAGADO':'badge-ok','VENCIDA':'badge-venc','PARCIAL':'badge-parc','PENDIENTE':'badge-pend'}[est2];
+      // AJUSTADO 2026-10-29: se agrega el caso fv===h ("vence hoy") antes
+      // de VENCIDA, para que una cuota que vence hoy no quede escondida
+      // como PENDIENTE junto a las futuras.
+      const est2=est==='PAGADO'?'PAGADO':est==='FINALIZADO'?'PAGADO':est==='CANCELADO'?'CANCELADA':(fv&&fv<h)?'VENCIDA':(fv===h&&saldo>0)?'HOY':cobrado>0?'PARCIAL':'PENDIENTE';
+      const bc={'PAGADO':'badge-ok','VENCIDA':'badge-venc','HOY':'badge-hoy','PARCIAL':'badge-parc','PENDIENTE':'badge-pend','CANCELADA':'badge-grey'}[est2];
 
       let saldoLine='';
       if(cobrado>0&&est2!=='PAGADO'){
@@ -510,7 +665,7 @@ function verVencidas() {
            COALESCE((SELECT SUM(p.mora_cobrada) FROM pagos p WHERE p.cuota_id=c.id),0) mora
     FROM cuotas c JOIN prestamos pr ON c.prestamo_id=pr.id JOIN clientes cl ON pr.cliente_id=cl.id
     WHERE c.estado NOT IN ('PAGADO','FINALIZADO','CANCELADO')
-      AND pr.estado NOT IN ('FINALIZADO','CANCELADO','EN_ESPERA','VENDIDO','INCOBRABLE','COMPLETADO')
+      AND pr.estado NOT IN ('FINALIZADO','CANCELADO','EN_ESPERA','VENDIDO','INCOBRABLE','COMPLETADO','EN_JUICIO')
       AND c.fecha_vencimiento<=? ORDER BY c.fecha_vencimiento ASC LIMIT 60`,[h]);
   const el=document.getElementById('clientesContent');
   el.innerHTML=`<div class="back-btn" onclick="renderClientes()">‹ Volver</div>`;
@@ -541,6 +696,41 @@ function verVencidas() {
   el.appendChild(card);
 }
 
+// AGREGADO 2026-10-30, a pedido de Waldo: botón "Vencen hoy" — lista SOLO
+// las cuotas cuyo vencimiento es exactamente hoy (a diferencia de
+// verVencidas, que mezcla las de hoy con las atrasadas).
+function verVencenHoy() {
+  const h=hoy();
+  const res=DB.exec(`
+    SELECT cl.apellido,cl.nombre,cl.telefono,c.fecha_vencimiento,c.monto_cuota,c.numero_cuota,pr.moneda,cl.id,
+           COALESCE((SELECT SUM(p.monto_pagado) FROM pagos p WHERE p.cuota_id=c.id),0) pagado
+    FROM cuotas c JOIN prestamos pr ON c.prestamo_id=pr.id JOIN clientes cl ON pr.cliente_id=cl.id
+    WHERE c.estado NOT IN ('PAGADO','FINALIZADO','CANCELADO')
+      AND pr.estado NOT IN ('FINALIZADO','CANCELADO','EN_ESPERA','VENDIDO','INCOBRABLE','COMPLETADO','EN_JUICIO')
+      AND c.fecha_vencimiento=? ORDER BY cl.apellido ASC LIMIT 100`,[h]);
+  const el=document.getElementById('clientesContent');
+  el.innerHTML=`<div class="back-btn" onclick="renderClientes()">‹ Volver</div>`;
+  const card=document.createElement('div'); card.className='card';
+  const filas=(res.length&&res[0].values.length)?res[0].values.filter(r=>Math.max(0,(r[4]||0)-(r[8]||0))>0):[];
+  if(!filas.length){
+    card.innerHTML=`<div class="card-title">📆 Vencen hoy</div><div class="empty"><div class="empty-icon">🎉</div>¡No hay cuotas que venzan hoy!</div>`;
+  } else {
+    card.innerHTML=`<div class="card-title">📆 ${filas.length} cuota(s) vencen hoy</div>`;
+    filas.forEach(r=>{
+      const[ape,nom,tel,fv,m,nc,moneda,cid,pag]=r;
+      const sym=moneda==='USD'?'U$S ':'$';
+      const saldo=Math.max(0,(m||0)-(pag||0));
+      card.innerHTML+=`<div class="list-item" onclick="verCliente(${cid})" style="flex-direction:column;align-items:flex-start;gap:3px">
+        <div style="display:flex;width:100%"><b>${ape} ${nom}</b><span class="badge badge-hoy" style="margin-left:auto">HOY</span></div>
+        <div style="font-size:12px;color:var(--muted)">Cuota ${nc} · ${fv}</div>
+        <div style="font-size:14px;font-weight:700;color:#FFD54F">${sym}${Number(saldo).toLocaleString('es-AR')} a cobrar</div>
+        ${tel?`<div style="font-size:12px;color:var(--accent)">📞 ${tel}</div>`:''}
+      </div>`;
+    });
+  }
+  el.appendChild(card);
+}
+
 // ══════════════════════════════════════════════════════
 //  SECCIÓN CAJA
 // ══════════════════════════════════════════════════════
@@ -563,37 +753,37 @@ function renderHerramientas() {
 function verEspera() {
   const el=document.getElementById('herramientasContent');
   el.innerHTML=`<div class="back-btn" onclick="renderHerramientas()">‹ Volver</div>`;
+  // AJUSTADO 2026-11-05: igual que el sistema de escritorio — UNA sola lista con
+  // créditos e ítems mezclados, solo PENDIENTES (estado='PENDIENTE' / EN_ESPERA;
+  // antes se mostraba todo lo que no fuera COMPLETADO y aparecían compras de USD
+  // ya terminadas) y ordenada por fecha límite ascendente (si no tiene, la de
+  // creación): lo que vence antes arriba.
+  const filas=[];
+  const ord=f=>{ if(!f) return 0; const m=String(f).slice(0,10).split('-'); return Date.UTC(+m[0],(+m[1]||1)-1,+m[2]||1)/86400000; };
+  const esc=t=>String(t==null?'':t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 
-  // ── CRÉDITOS EN ESPERA ──────────────────────────────
+  // ── CRÉDITOS EN ESPERA ──
   const creditos=DB.exec(`
     SELECT pr.id, cl.apellido||' '||cl.nombre nombre, cl.telefono,
            pr.monto_prestado, pr.moneda, pr.cantidad_cuotas,
            pr.tipo_sistema, pr.frecuencia, pr.fecha_inicio, pr.observaciones,
-           pr.monto_entregado, pr.alias_cbu
+           pr.monto_entregado, pr.fecha_limite
     FROM prestamos pr JOIN clientes cl ON pr.cliente_id=cl.id
-    WHERE pr.estado='EN_ESPERA' ORDER BY pr.id DESC`);
-
-  const cardCred=document.createElement('div'); cardCred.className='card';
-  cardCred.innerHTML=`<div class="card-title">💰 Créditos en espera</div>`;
-  if(!creditos.length||!creditos[0].values.length){
-    cardCred.innerHTML+=`<div class="empty" style="padding:16px"><div class="empty-icon">✅</div>Sin créditos en espera</div>`;
-  } else {
-    cardCred.innerHTML+=`<div style="font-size:12px;color:var(--muted);margin-bottom:8px">${creditos[0].values.length} crédito(s)</div>`;
-    creditos[0].values.forEach(r=>{
-      const[id,nom,tel,monto,moneda,cuotas,sistema,freq,fecha,obs,entregado,alias]=r;
-      const sym=moneda==='USD'?'U$S ':'$';
-      const cub=entregado||0;
-      const faltante=Math.max(0,(monto||0)-cub);
-      const pct=monto>0?Math.min(100,(cub/monto)*100):0;
-      cardCred.innerHTML+=`<div class="espera-item">
+    WHERE pr.estado='EN_ESPERA'`);
+  if(creditos.length) creditos[0].values.forEach(r=>{
+    const[id,nom,tel,monto,moneda,cuotas,sistema,freq,fecha,obs,entregado,flim]=r;
+    const sym=moneda==='USD'?'U$S ':'$';
+    const cub=entregado||0;
+    const faltante=Math.max(0,(monto||0)-cub);
+    const pct=monto>0?Math.min(100,(cub/monto)*100):0;
+    filas.push({k:ord(flim||fecha),h:`<div class="espera-item">
         <div style="display:flex;justify-content:space-between;align-items:flex-start">
           <div>
-            <div style="font-size:11px;color:var(--muted);font-family:var(--mono)">#${id} · ${fecha?fecha.slice(0,10):'—'}</div>
-            <div style="font-weight:600;font-size:15px;margin-top:2px">${nom}</div>
+            <div style="font-size:11px;color:var(--muted);font-family:var(--mono)">CRÉDITO #${id} · ${fecha?fecha.slice(0,10):'—'}${flim?' · límite '+String(flim).slice(0,10):''}</div>
+            <div style="font-weight:600;font-size:15px;margin-top:2px">${esc(nom)}</div>
             <div style="font-size:12px;color:var(--muted);margin-top:2px">${cuotas} cuotas · ${sistema||''} · ${freq||''}</div>
             ${tel?`<div style="font-size:12px;color:var(--accent)">📞 ${tel}</div>`:''}
-            ${alias?`<div style="font-size:12px;color:var(--accent2);font-family:var(--mono)">🏦 ${alias}</div>`:''}
-            ${obs?`<div style="font-size:12px;color:var(--muted);margin-top:2px">${obs}</div>`:''}
+            ${obs?`<div style="font-size:12px;color:var(--muted);margin-top:2px">${esc(obs)}</div>`:''}
           </div>
           <div style="text-align:right;flex-shrink:0;margin-left:10px">
             <div style="font-weight:700;font-size:16px;color:var(--accent2)">${sym}${Number(monto||0).toLocaleString('es-AR')}</div>
@@ -604,37 +794,52 @@ function verEspera() {
         </div>
         <div class="espera-prog"><div class="espera-fill" style="width:${pct}%"></div></div>
         <div style="font-size:10px;color:var(--muted);margin-top:3px;text-align:right">${pct.toFixed(0)}% fondeado</div>
-      </div>`;
-    });
+      </div>`});
+  });
+
+  // ── GASTOS / PAGOS / COMPRAS EN ESPERA ──
+  let items=[];
+  try{
+    items=DB.exec(`
+      SELECT id,tipo,descripcion,monto_total,monto_cubierto,moneda_pago,
+             fecha_creacion,estado,observaciones,fecha_limite
+      FROM items_espera
+      WHERE estado='PENDIENTE'`);
+  }catch(e){
+    items=DB.exec(`SELECT id,tipo,descripcion,monto_total,monto_cubierto,moneda_pago,fecha_creacion,estado,observaciones,NULL FROM items_espera WHERE estado='PENDIENTE'`);
   }
-  el.appendChild(cardCred);
-
-  // ── GASTOS / PAGOS EN ESPERA ────────────────────────
-  const items=DB.exec(`
-    SELECT id,tipo,descripcion,monto_total,monto_cubierto,moneda_pago,
-           fecha_creacion,estado,observaciones,alias_cbu
-    FROM items_espera
-    WHERE UPPER(COALESCE(estado,'PENDIENTE')) NOT IN ('COMPLETADO','CANCELADO')
-    ORDER BY fecha_creacion ASC`);
-
-  const cardItems=document.createElement('div'); cardItems.className='card';
-  cardItems.innerHTML=`<div class="card-title">📋 Gastos / pagos en espera</div>`;
-  if(!items.length||!items[0].values.length){
-    cardItems.innerHTML+=`<div class="empty" style="padding:16px"><div class="empty-icon">✅</div>Sin ítems pendientes</div>`;
-  } else {
-    cardItems.innerHTML+=`<div style="font-size:12px;color:var(--muted);margin-bottom:8px">${items[0].values.length} ítem(s)</div>`;
-    items[0].values.forEach(r=>{
-      const[id,tipo,desc,total,cub,moneda,fecha,estado,obs,alias]=r;
-      const pct=total>0?Math.min(100,((cub||0)/total)*100):0;
-      const sym=moneda==='USD'?'U$S ':'$';
-      const faltante=Math.max(0,(total||0)-(cub||0));
-      cardItems.innerHTML+=`<div class="espera-item">
+  const tipoMapa={GASTO:'GASTO',COMPRA_USD:'COMPRA USD',PAGO_INVERSOR:'PAGO INVERSOR',INVERSION_PROPIA:'INV. PROPIA',APORTE_INV_PROPIA:'APORTE INV. PROPIA'};
+  if(items.length) items[0].values.forEach(r=>{
+    const[id,tipo,desc,total,cub,moneda,fecha,estado,obs,flim]=r;
+    const pct=total>0?Math.min(100,((cub||0)/total)*100):0;
+    const sym=moneda==='USD'?'U$S ':'$';
+    const faltante=Math.max(0,(total||0)-(cub||0));
+    const pagos=DB.exec(`
+      SELECT g.fecha, g.monto, g.moneda, g.descripcion
+      FROM gastos g
+      WHERE g.categoria='ENTREGA_ESPERA' AND g.descripcion LIKE '%#${id}%'
+      ORDER BY g.fecha ASC`);
+    let detalleHTML='';
+    if(pagos.length&&pagos[0].values.length){
+      const filasPag=pagos[0].values.map(p=>{
+        const [pfecha,pmonto,pmon]=p;
+        const psym=pmon==='USD'?'U$S ':'$';
+        return `<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);padding:2px 0;border-bottom:1px solid var(--border)">
+            <span>${pfecha?pfecha.slice(0,10):'—'}</span>
+            <span style="color:var(--ok);font-weight:600">${psym}${Number(pmonto).toLocaleString('es-AR')}</span>
+          </div>`;
+      }).join('');
+      detalleHTML=`<div style="margin-top:6px;padding:6px 8px;background:var(--bg);border-radius:6px;border:1px solid var(--border)">
+          <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Entregas recibidas</div>
+          ${filasPag}
+        </div>`;
+    }
+    filas.push({k:ord(flim||fecha),h:`<div class="espera-item">
         <div style="display:flex;justify-content:space-between;align-items:flex-start">
           <div>
-            <div style="font-size:11px;color:var(--muted);font-family:var(--mono)">#${id} · ${fecha?fecha.slice(0,10):'—'} · ${tipo||'—'}</div>
-            <div style="font-weight:600;font-size:14px;margin-top:2px">${desc||'—'}</div>
-            ${alias?`<div style="font-size:12px;color:var(--accent2);font-family:var(--mono)">🏦 ${alias}</div>`:''}
-            ${obs?`<div style="font-size:12px;color:var(--muted);margin-top:2px">${obs}</div>`:''}
+            <div style="font-size:11px;color:var(--muted);font-family:var(--mono)">#${id} · ${fecha?fecha.slice(0,10):'—'} · ${tipoMapa[tipo]||tipo||'—'}${flim?' · límite '+String(flim).slice(0,10):''}</div>
+            <div style="font-weight:600;font-size:14px;margin-top:2px">${esc(desc)||'—'}</div>
+            ${obs?`<div style="font-size:12px;color:var(--muted);margin-top:2px">${esc(obs)}</div>`:''}
           </div>
           <div style="text-align:right;flex-shrink:0;margin-left:10px">
             <div style="font-weight:700;color:var(--accent2)">${sym}${Number(total||0).toLocaleString('es-AR')}</div>
@@ -644,10 +849,16 @@ function verEspera() {
         </div>
         <div class="espera-prog"><div class="espera-fill" style="width:${pct}%"></div></div>
         <div style="font-size:10px;color:var(--muted);margin-top:3px;text-align:right">${pct.toFixed(0)}% cubierto · ${estado||'PENDIENTE'}</div>
-      </div>`;
-    });
-  }
-  el.appendChild(cardItems);
+        ${detalleHTML}
+      </div>`});
+  });
+
+  filas.sort((a,b)=>a.k-b.k);
+  const card=document.createElement('div'); card.className='card';
+  card.innerHTML=`<div class="card-title">⏳ Lista de espera</div>`+(filas.length
+    ? `<div style="font-size:12px;color:var(--muted);margin-bottom:8px">${filas.length} pendiente(s) · primero lo que vence antes</div>`+filas.map(f=>f.h).join('')
+    : `<div class="empty" style="padding:16px"><div class="empty-icon">✅</div>Sin pendientes</div>`);
+  el.appendChild(card);
 }
 
 // ── PAGARÉS ────────────────────────────────────────────
