@@ -186,6 +186,27 @@
       <button class="btn btn-secondary" id="bcraBtn" style="margin-top:8px" onclick="consultarBCRA()">🔎 Consultar Central de Deudores</button>
       <div id="bcraRes" style="margin-top:10px;font-size:13px"></div>
     </div>
+
+    <!-- MOVIDO 2026-11-10, a pedido de Waldo: simulador disponible antes del login (no necesita la base) -->
+    <div class="card">
+      <div class="card-title">🧮 Simulador francés</div>
+      <div class="sim-input-wrap">
+        <label class="sim-label">Monto del préstamo</label>
+        <input class="sim-input" id="simMonto" type="number" inputmode="decimal" placeholder="100000" oninput="calcularFrances()">
+      </div>
+      <div style="display:flex;gap:8px">
+        <div class="sim-input-wrap" style="flex:1">
+          <label class="sim-label">Tasa mensual %</label>
+          <input class="sim-input" id="simTasa" type="number" inputmode="decimal" placeholder="15" oninput="calcularFrances()">
+        </div>
+        <div class="sim-input-wrap" style="width:96px">
+          <label class="sim-label">Moneda</label>
+          <select class="sim-input" id="simMoneda" onchange="calcularFrances()" style="padding:11px 8px"><option value="ARS">ARS</option><option value="USD">USD</option></select>
+        </div>
+      </div>
+      <div id="simResultado"></div>
+    </div>
+
   </div>
 
   <!-- CLIENTES -->
@@ -745,7 +766,6 @@ function renderHerramientas() {
       <div class="card-title">🧭 Herramientas</div>
       <button class="btn btn-secondary" onclick="verEspera()">⏳ Lista de espera</button>
       <button class="btn btn-secondary" onclick="verPagares()">📄 Estado de pagarés</button>
-      <button class="btn btn-secondary" onclick="verSimulador()">🧮 Simulador francés</button>
     </div>`;
 }
 
@@ -907,29 +927,6 @@ function filtrarPagares(estado, pill) {
   }).join('');
 }
 
-// ── SIMULADOR FRANCÉS ──────────────────────────────────
-function verSimulador() {
-  const el=document.getElementById('herramientasContent');
-  el.innerHTML=`
-    <div class="back-btn" onclick="renderHerramientas()">‹ Volver</div>
-    <div class="card">
-      <div class="card-title">🧮 Simulador francés</div>
-      <div class="sim-input-wrap">
-        <label class="sim-label">Monto del préstamo</label>
-        <input class="sim-input" id="simMonto" type="number" placeholder="100000" oninput="calcularFrances()">
-      </div>
-      <div class="sim-input-wrap">
-        <label class="sim-label">Tasa mensual %</label>
-        <input class="sim-input" id="simTasa" type="number" placeholder="15" oninput="calcularFrances()">
-      </div>
-      <div class="sim-input-wrap">
-        <label class="sim-label">Cantidad de cuotas</label>
-        <input class="sim-input" id="simCuotas" type="number" placeholder="12" oninput="calcularFrances()">
-      </div>
-      <div id="simResultado"></div>
-    </div>`;
-}
-
 // ── COBROS DEL DÍA ────────────────────────────────────
 let fechaCobros = hoy();
 
@@ -1025,45 +1022,35 @@ function cargarCobrosDelDia() {
 function calcularFrances() {
   const monto=parseFloat(document.getElementById('simMonto').value)||0;
   const tasa=parseFloat(document.getElementById('simTasa').value)||0;
-  const cuotas=parseInt(document.getElementById('simCuotas').value)||0;
+  const moneda=(document.getElementById('simMoneda')||{}).value||'ARS';
+  const sym=moneda==='USD'?'U$S ':'$';
   const res=document.getElementById('simResultado');
-  if(!monto||!tasa||!cuotas){ res.innerHTML=''; return; }
-
+  if(!monto||!tasa){ res.innerHTML=''; return; }
   const r=tasa/100;
-  const cuotaMensual=monto*(r*Math.pow(1+r,cuotas))/(Math.pow(1+r,cuotas)-1);
-  const totalPagar=cuotaMensual*cuotas;
-  const totalInteres=totalPagar-monto;
+  const fmtN=v=>Math.round(v).toLocaleString('es-AR');
+  // Mismo redondeo que redondear_monto() del sistema: USD al entero, ARS al múltiplo
+  // de 100 más cercano (Python usa redondeo bancario en el .5 exacto).
+  const rnd=x=>{const f=Math.floor(x),d=x-f; return d<0.5?f:d>0.5?f+1:(f%2===0?f:f+1);};
+  const redondear=v=>moneda==='USD'?rnd(v):rnd(v/100)*100;
 
-  // Tabla de amortización
-  let saldo=monto, filas='', capTotal=0, intTotal=0;
-  for(let i=1;i<=cuotas;i++){
-    const interes=saldo*r;
-    const capital=cuotaMensual-interes;
-    saldo-=capital;
-    capTotal+=capital; intTotal+=interes;
-    if(i<=5||i===cuotas){
-      filas+=`<tr>
-        <td>${i}</td>
-        <td>${fmt(cuotaMensual)}</td>
-        <td>${fmt(capital)}</td>
-        <td>${fmt(interes)}</td>
-        <td>${fmt(Math.max(0,saldo))}</td>
-      </tr>`;
-    }
-    if(i===5&&cuotas>6){ filas+=`<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:6px">···</td></tr>`; }
+  let filas='';
+  for(let n=2;n<=12;n++){
+    const cuota=redondear(monto*(r*Math.pow(1+r,n))/(Math.pow(1+r,n)-1));
+    const total=cuota*n;
+    const interes=total-monto;
+    filas+=`<tr>
+      <td style="font-weight:700;color:var(--accent);text-align:center">${n}</td>
+      <td style="font-weight:700">${sym}${fmtN(cuota)}</td>
+      <td>${sym}${fmtN(total)}</td>
+      <td style="color:var(--accent2)">${sym}${fmtN(interes)}</td>
+    </tr>`;
   }
 
-  res.innerHTML=`<div class="sim-result">
-    <div style="font-size:11px;color:var(--muted);text-align:center;text-transform:uppercase;letter-spacing:1px">Cuota mensual</div>
-    <div class="sim-cuota-big">${fmt(cuotaMensual)}</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
-      <div class="res-item"><div class="res-label">Total a pagar</div><div class="res-val danger">${fmt(totalPagar)}</div></div>
-      <div class="res-item"><div class="res-label">Total intereses</div><div class="res-val accent">${fmt(totalInteres)}</div></div>
-    </div>
-    <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Amortización</div>
+  res.innerHTML=`<div class="sim-result" style="margin-top:12px">
+    <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Todas las opciones — monto ${sym}${fmtN(monto)} al ${tasa}% mensual</div>
     <div style="overflow-x:auto">
       <table class="sim-table">
-        <thead><tr><th>N°</th><th>Cuota</th><th>Capital</th><th>Interés</th><th>Saldo</th></tr></thead>
+        <thead><tr><th>Cuotas</th><th>Cuota mensual</th><th>Total a pagar</th><th>Total intereses</th></tr></thead>
         <tbody>${filas}</tbody>
       </table>
     </div>
